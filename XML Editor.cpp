@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
-
+#include "Minify.h"
 using namespace std;
 int main()
 {
@@ -17,6 +17,7 @@ int main()
 
         testchars.push_back(ch);
     }
+    minify(testchars);
     for (int i = 0; i < testchars.size(); i++)
     {
         cout << testchars[i];

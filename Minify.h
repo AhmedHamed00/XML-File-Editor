@@ -1,15 +1,15 @@
 #ifndef Minify
 #define Minify
 
-
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
 #include <vector>
-#include <string>
 
 using namespace std;
-
-void Minify(vector<char> input);
+/*
+ * Description :
+ * Functional responsible for Minifying the XML filr:
+ * Inputs:
+ *		  input-> the xml file read into a char vector
+ */
+void minify(vector<char>& input);
 
 #endif /* Minify */
