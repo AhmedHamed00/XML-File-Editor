@@ -1,17 +1,16 @@
 
+//This main function is provided for testing by Ahmed Hamed 
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <vector>
 #include <string>
+
 using namespace std;
 int main()
 {
-    cout << "please enter file name \n";
-    string file_name;
-    getline(cin, file_name);
     ifstream test;
-    test.open(file_name);
+    test.open("sample.xml");
     vector<char> testchars;
     char ch;
     while (test.get(ch)) {
