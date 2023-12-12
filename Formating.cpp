@@ -1,4 +1,4 @@
-#include "Minify.h"
+#include "Formating.h"
 /*
  * Description :
  * Functional responsible for Minifying the XML filr:

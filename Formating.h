@@ -1,5 +1,5 @@
-#ifndef Minify
-#define Minify
+#ifndef Formating
+#define Formating
 
 #include <vector>
 
@@ -12,4 +12,4 @@ using namespace std;
  */
 void minify(vector<char>& input);
 
-#endif /* Minify */
+#endif /* Formating */

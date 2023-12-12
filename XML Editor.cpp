@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
-#include "Minify.h"
+#include "Formating.h"
 using namespace std;
 int main()
 {
