@@ -11,14 +11,18 @@ int main()
 {
     ifstream test;
     test.open("sample.xml");
-    vector<char> testchars;
+    vector<char> testchars;// {'a', 'a', 'b', 'c', 'f', 'a', 'a', 'b', 'f', 'g'};
     char ch;
     while (test.get(ch)) {
 
         testchars.push_back(ch);
     }
-    minify(testchars);
-    for (int i = 0; i < testchars.size(); i++)
+    cout << testchars.size() << endl;
+   minify(testchars);
+    compress(testchars);
+    
+    cout<<testchars.size()<<endl;
+    for (unsigned int i = 0; i < testchars.size(); i++)
     {
         cout << testchars[i];
     }
