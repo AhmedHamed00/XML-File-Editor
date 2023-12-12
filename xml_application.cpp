@@ -84,16 +84,22 @@ void XML_Application::on_pushButton_clicked()
         ui->textEdit->setTextColor(Qt::red);
         ui->textEdit->insertPlainText("  <--------- ERROR");
     }
+/*
+ *   by text replacement (not used)
+ *
+ *  text.replace("","");
+ *  text.replace("***","<------- ERROR");
+ *  ui->textEdit->setPlainText(text);
+ *
+ */
 
-    // text.replace("","");
-    // text.replace("***","<------- ERROR");
-    //ui->textEdit->setPlainText(text);
+/*
+    try to compress
 
-
-    // text.replace("\n","");
-    // text.replace(" ","");
-    //ui->textEdit->setText(text);
-
+    text.replace("\n","");
+    text.replace(" ","");
+    ui->textEdit->setText(text);
+*/
 
 }
 
