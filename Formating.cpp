@@ -10,6 +10,18 @@ void minify(vector<char>& input)
 {
 	for (unsigned int i = 0; i < input.size(); i++)
 	{
+		if(input[i]< (input.size()-5) && input[i] =='<' && input[i+1] == 'b' && input[i+2] == 'o' && input[i+3] == 'd' && input[i+4] == 'y')
+		{
+			i++;
+			while (input[i] != '<')
+			{
+				if (input[i] == '\n')
+				{
+					input.erase(input.begin() + i);
+				}
+				i++;
+			}
+		}
 		if (input[i]=='\n'|| input[i] == '\r' || input[i] == 9 || input[i] == ' ')
 		{
 			input.erase(input.begin() + i);
@@ -23,10 +35,7 @@ void compress(vector<char>& input)
 	char count = -1;
 	vector<vector<char>> key;
 	vector<char> value;
-	vector<vector<long long> > index;
 	
-	vector<long long> temp_index;
-	char continue_flag = 0;
 	char general_flag = 1;
 	while (general_flag == 1)
 	{
@@ -45,13 +54,6 @@ void compress(vector<char>& input)
 						addition_flag = 1;
 						value.push_back(count);
 						key.push_back(temp);
-						vector<long long> x;
-						x.push_back(j);
-						index.push_back(x);
-					}
-					else
-					{
-						index.back().push_back(j);
 					}
 					input[j] = count;
 					input.erase(input.begin() + j + 1);

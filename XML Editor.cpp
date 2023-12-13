@@ -17,13 +17,16 @@ int main()
 
         testchars.push_back(ch);
     }
-    cout << testchars.size() << endl;
+   // cout << testchars.size() << endl;
    minify(testchars);
-    compress(testchars);
+   // compress(testchars);
     
     cout<<testchars.size()<<endl;
     for (unsigned int i = 0; i < testchars.size(); i++)
     {
         cout << testchars[i];
     }
+
+
+    printf("%c", 129);
 }
