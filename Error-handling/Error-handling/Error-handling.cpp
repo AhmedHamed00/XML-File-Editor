@@ -5,8 +5,8 @@ using namespace std;
 int main()
 {
     uint8_t x;
-    vector<xml_error> test = find_errors("D:/ASU/7/DS/Project notes/New_Text_Document.xml", x, 0);
-    for (auto a : test)
+    find_errors("D:/ASU/7/DS/Project notes/New_Text_Document.xml", x, 0);
+    for (auto a : g_error_list)
     {
         cout << a << endl;
     }
