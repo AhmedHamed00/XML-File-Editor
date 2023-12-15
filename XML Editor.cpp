@@ -20,7 +20,7 @@ int main()
     
    minify(testchars);
    // compress(testchars);
-   testchars.push_back('\n');
+   //testchars.push_back('\n');
    for (unsigned int i = 0; i < testchars.size(); i++)
    {
        cout << testchars[i];

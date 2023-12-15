@@ -5,12 +5,13 @@
 #include <algorithm>
 using namespace std;
 typedef struct node {
-    char data;
+    char valid_data = 0;
+    char data=-1;
     long long occure = 0;
-    node* perant;
+    node* perant = 0;
     char direction;
-    node* left;
-    node* right;
+    node* left=0;
+    node* right = 0;
 } node;
 typedef struct tree {
     node* head;
