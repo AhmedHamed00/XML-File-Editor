@@ -7,7 +7,6 @@
 #include <stack>
 using namespace std;
 
-extern vector<xml_error>g_error_list;
 
 enum class ERROR_TYPE :uint8_t
 {
@@ -56,5 +55,10 @@ public:
 
 	xml_tag() = default;
 };
+
+extern vector<xml_error> error_list;
+extern vector<pair<xml_tag, xml_tag>> missing_opening;
+extern vector<pair<xml_tag, xml_tag>> missing_closing;
+extern vector<pair<xml_tag, xml_tag>> mismatch_error;
 
 void find_errors(string file_path, uint8_t& success, int check_flag);
