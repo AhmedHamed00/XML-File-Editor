@@ -17,18 +17,30 @@ int main()
 
         testchars.push_back(ch);
     }
-   // cout << testchars.size() << endl;
+    
    minify(testchars);
    // compress(testchars);
-   vector<char> copy = testchars;
+   testchars.push_back('\n');
+   for (unsigned int i = 0; i < testchars.size(); i++)
+   {
+       cout << testchars[i];
+   }
+   vector<char> copy ;
+   vector<char> copy2;
    tree x;
    compress_hoffman_encoding(testchars, copy, x);
    // cout<<testchars.size()<<endl;
-    for (unsigned int i = 0; i < testchars.size(); i++)
+   for (unsigned int i = 0; i < copy.size(); i++)
+   {
+       cout << copy[i];
+   }
+    cout << endl;
+    decompress(copy, copy2, x);
+    for (unsigned int i = 0; i < copy2.size(); i++)
     {
-        cout << copy[i];
+        cout << copy2[i];
     }
-
-
+    cout << endl<<testchars.size() << endl;
+    cout << copy.size() << endl;
     //printf("%c", 129);
 }
