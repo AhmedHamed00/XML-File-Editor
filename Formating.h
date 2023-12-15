@@ -2,8 +2,19 @@
 #define Formating
 
 #include <vector>
-
+#include <algorithm>
 using namespace std;
+typedef struct node {
+    char data;
+    int occure = 0;
+    node* perant;
+    char direction;
+    node* left;
+    node* right;
+} node;
+typedef struct tree {
+    node* head;
+} tree;
 /*
  * Description :
  * Functional responsible for Minifying the XML filr:
@@ -20,5 +31,7 @@ void minify(vector<char>& input);
  */
 void compress(vector<char>& input);
 void save_compressed_file(vector<char>& input, vector<char [2]> key, vector<vector<int> > index);
+void compress_hoffman_encoding(vector<char>& input, vector<char>& output, tree& hoffman);
+
 
 #endif /* Formating */

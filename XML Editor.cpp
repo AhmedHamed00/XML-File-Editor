@@ -20,13 +20,15 @@ int main()
    // cout << testchars.size() << endl;
    minify(testchars);
    // compress(testchars);
-    
-    cout<<testchars.size()<<endl;
+   vector<char> copy = testchars;
+   tree x;
+   compress_hoffman_encoding(testchars, copy, x);
+   // cout<<testchars.size()<<endl;
     for (unsigned int i = 0; i < testchars.size(); i++)
     {
-        cout << testchars[i];
+        cout << copy[i];
     }
 
 
-    printf("%c", 129);
+    //printf("%c", 129);
 }
