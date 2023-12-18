@@ -10,7 +10,7 @@
 
 void minify(vector<char>& input)
 {
-	for (unsigned int i = 0; i < input.size()-9; i++)
+	for (unsigned int i = 0; i < input.size(); i++)
 	{
 		if(i< (input.size()-5) && input[i] =='<' && input[i+1] == 'b' && input[i+2] == 'o' && input[i+3] == 'd' && input[i+4] == 'y')
 		{
@@ -54,7 +54,7 @@ void compress_hoffman_encoding(vector<char>& input, vector<char>& output,tree& h
 			letters_nodes.push_back((node*)malloc(sizeof(node)));
 			letters_nodes_copy.push_back(letters_nodes[letters_nodes.size() - 1]);
 			letters_nodes[letters_nodes.size() - 1]->data = j;
-			letters_nodes[letters_nodes.size() - 1]->valid_data = 1;
+			letters_nodes[letters_nodes.size() - 1]->valid_data = 2;
 			letters_nodes[letters_nodes.size() - 1]->occure = count;
 		}
 	}
@@ -91,10 +91,10 @@ void compress_hoffman_encoding(vector<char>& input, vector<char>& output,tree& h
 		node* c=letters_nodes_copy[i];
 		while (c->perant != hoffman.head)
 		{
-			encoding_list[letters_nodes_copy[i]->data].push_back(c->direction);
+			encoding_list[letters_nodes_copy[i]->data].insert(encoding_list[letters_nodes_copy[i]->data].begin(),c->direction);
 			c = c->perant;
 		}
-		encoding_list[letters_nodes_copy[i]->data].push_back(c->direction);
+		encoding_list[letters_nodes_copy[i]->data].insert(encoding_list[letters_nodes_copy[i]->data].begin(), c->direction);
 	}
 	vector<char> bitss;
 	
@@ -105,21 +105,21 @@ void compress_hoffman_encoding(vector<char>& input, vector<char>& output,tree& h
 		{
 			bitss.push_back(encoding_list[input[i]][j]);
 		}
-		while (bitss.size() >= 8)
+	
+	}
+	while (bitss.size() >= 8)
+	{
+		char result = 0;
+		for (int i = 0; i < 8; ++i)
 		{
-			char result = 0;
-			for (int i = 0; i < 8; ++i)
-			{
-				result |= (bitss[i]) << (7 - i);
-			}
-			output.push_back(result);
-			for (int i = 0; i < 8; ++i)
-			{
-				bitss.erase(bitss.begin());
-			}
+			result |= (bitss[i]) << (7 - i);
+		}
+		output.push_back(result);
+		for (int i = 0; i < 8; ++i)
+		{
+			bitss.erase(bitss.begin());
 		}
 	}
-	
 	char result = 0;
 	
 		for (int j = 0; j < bitss.size(); j++)
@@ -128,38 +128,44 @@ void compress_hoffman_encoding(vector<char>& input, vector<char>& output,tree& h
 		}
 		
 	output.push_back(result);
+	output.push_back(8-bitss.size());
 }
 void decompress(vector<char>& input, vector<char>& output, tree& hoffman)
 {
 	vector<char> x;
-	for (int i = 0; i < input.size(); i++)
+	for (int i = 0; i < input.size()-1; i++)
 	{
 		for (int j = 7; j >=0; j--)
 		{
-			x.insert(x.begin(),GET_BIT(input[i], j));
+			x.insert(x.end(),GET_BIT(input[i], j));
 		}
 	}
 	node* z = hoffman.head;
-	for (long long i = 0; i < x.size(); i++)
+	for (long long i = 0; i <= x.size()- input[input.size() - 1]; i++)
 	{
 		if (z->data < 0)
 		{
 			if (x[i] == 0)
 			{
+				if(z->left!=0)
 				z = z->left;
 			}
 			else
 			{
+				if (z->left != 0)
 				z = z->right;
 			}
 		}
-		else if(z->valid_data==1)
+		else if(z->valid_data==2)
 		{
-			output.insert(output.begin(),z->data);
+			if (z->left != 0)
+			output.insert(output.end(),z->data);
 			z = hoffman.head;
 			i--;
 		}
 	}
+	output;
+	x;
 }
 void compress(vector<char>& input)
 {

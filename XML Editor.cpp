@@ -17,10 +17,10 @@ int main()
 
         testchars.push_back(ch);
     }
-    
+    cout << endl << testchars.size() << endl;
    minify(testchars);
    // compress(testchars);
-   //testchars.push_back('\n');
+   testchars.push_back('\n');
    for (unsigned int i = 0; i < testchars.size(); i++)
    {
        cout << testchars[i];
@@ -41,6 +41,6 @@ int main()
         cout << copy2[i];
     }
     cout << endl<<testchars.size() << endl;
-    cout << copy.size() << endl;
+    cout << copy2.size() << endl;
     //printf("%c", 129);
 }
