@@ -52,7 +52,8 @@ public:
 		: tag_name(tag_name), type(type), line(line), found(found)
 	{
 	}
-
+	bool operator>(const xml_tag& a);
+	bool operator<(const xml_tag& a);
 	xml_tag() = default;
 };
 

@@ -34,7 +34,7 @@ static bool find_bracket_error(ifstream& file, vector<xml_error>& error_list)
 static vector<string> get_tags(istream& file)
 {
 	smatch s;
-	regex tag_finder("<\/?[a-z]+>");
+	regex tag_finder("<\/?[a-z _0-9]+>");
 	string search_text;
 	getline(file, search_text);
 	vector<string> m;
@@ -143,37 +143,25 @@ void find_errors(string file_path, uint8_t& success, int check_flag)
 					tags.pop();
 				else
 				{
-					//if a tag mismatch at the same line
-					if (!tags.empty() && tags.top().line == current_tag.line)
-					{
-						tag_pair.first = tags.top();
-						tag_pair.second = current_tag;
-						mismatch_error.push_back(tag_pair);
-						string err = "Tags <" + tags.top().tag_name + "> and </" + current_tag.tag_name + "> mismatch";
-						error_list.push_back(xml_error(ERROR_TYPE::MISMATCH_TAG, ERROR_MAIN_TYPE::LOGICAL, true, tags.top().line, err));
-						tags.pop();
-					}
-					//if a tag mismatch not at the same line declare missing open error
+					if (!tags.empty())
+						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false);
 					else
-					{
-						if(!tags.empty())
-							tag_pair.first=xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false);
-						else
-							tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, current_tag.line, false);
-						tag_pair.second = current_tag;
-						missing_opening.push_back(tag_pair);
-					}
+						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, current_tag.line, false);
+					tag_pair.second = current_tag;
+					missing_opening.push_back(tag_pair);
 				}
 			}
 		}
 		line++;
 	}
+	int line_limit = line;
+	int eq_flag = false;
 	while (!tags.empty())
 	{
 		//if no errors was found
 		if (missing_opening.empty())
 		{
-			//add error to mising closing and remove it from missing opening
+			//add error to mising closing 
 			tag_pair.first = tags.top();
 			tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, tags.top().line, false);
 			missing_closing.push_back(tag_pair);
@@ -185,15 +173,20 @@ void find_errors(string file_path, uint8_t& success, int check_flag)
 			//if found it is a missing closing tag
 			if (missing_opening[i].first.line >= tags.top().line)
 			{
+				if (missing_opening[i].first.line == tags.top().line)eq_flag = true;
+				else eq_flag = false;
 				//add error to mising closing and remove it from missing opening 
 				tag_pair.first = tags.top();
 				tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, missing_opening[i].second.line, false);
 				missing_closing.push_back(tag_pair);
+				line_limit = tags.top().line;
 				tags.pop();
 				//try to pop the stack
 				if (tags.empty())break;
 				for (int j = i; j < missing_opening.size(); j++)
 				{
+					if ((missing_opening[j].first.line > line_limit) && eq_flag)
+						continue;
 					//if you found a matching tag pop the stack and remove the error
 					if (tags.top().tag_name == missing_opening[j].first.tag_name)
 					{
@@ -207,13 +200,19 @@ void find_errors(string file_path, uint8_t& success, int check_flag)
 			if (tags.empty())break;
 		}
 	}
+	//sort the arrays to use binary search
+	sort(missing_opening.begin(), missing_opening.end());
+	sort(missing_closing.begin(), missing_closing.end());
+	//find mismatches
+	//a mismatch is when the same tag is a missing open and another tag is missing close and both are in the same line
 	for (int i = 0;i<missing_opening.size();i++)
 	{
 		int l = 0, r = missing_closing.size() - 1;
 		int j = -1;
+		int m = ceil(l + static_cast<float>(r - l) / 2);
 		while (l <= r)
 		{
-			int m = ceil(l + static_cast<float>(r - l) / 2);
+			m = ceil(l + static_cast<float>(r - l) / 2);
 			if (missing_closing[m].first.line == missing_opening[i].first.line)
 			{
 				if (missing_closing[m].second.line == missing_opening[i].second.line)
@@ -221,11 +220,17 @@ void find_errors(string file_path, uint8_t& success, int check_flag)
 					j = m;
 					break;
 				}
+				else if (missing_closing[m].second.line < missing_opening[i].second.line)
+					m++;
+				else if (missing_closing[m].second.line < missing_opening[i].second.line)
+					m--;
+				if (m > r || m < l)
+					break;
 			}
 			if (missing_closing[m].first.line < missing_opening[i].first.line)
-				l = m + 1;
+				l = m+1;
 			else
-				r = m - 1;
+				r = m-1;
 		}
 		if (j != -1)
 		{
@@ -267,4 +272,16 @@ ostream& operator << (ostream& out, const xml_error& c)
 	out << "Line : " << c.line << "\t" << c.msg << endl <<'\t' << c.main_type << c.error_type \
 		<< "\tSolvabilty : " << (c.solvable ? "can be solved" : "can't be solved");
 	return out;
+}
+bool operator>(const xml_tag& a, const xml_tag& b)
+{
+	if (a.line > b.line)
+		return true;
+	return false;
+}
+bool operator<(const xml_tag& a, const xml_tag& b)
+{
+	if (a.line < b.line)
+		return true;
+	return false;
 }
