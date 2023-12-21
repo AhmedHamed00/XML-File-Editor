@@ -1,7 +1,10 @@
-﻿  error_handling.cpp
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(12,15): warning C4129: '/': unrecognized character escape sequence
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(37,19): warning C4129: '/': unrecognized character escape sequence
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(210,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(212,9): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(215,12): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+﻿  Error-handling.cpp
+  error_handling.cpp
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(13,15): warning C4129: '/': unrecognized character escape sequence
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(38,19): warning C4129: '/': unrecognized character escape sequence
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(188,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(212,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(214,9): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(217,12): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+  Generating Code...
   Error-handling.vcxproj -> D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\x64\Debug\Error-handling.exe

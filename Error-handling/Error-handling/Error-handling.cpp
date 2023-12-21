@@ -5,7 +5,8 @@ using namespace std;
 int main()
 {
     uint8_t x;
-    find_errors("D:/ASU/7/DS/Project notes/sample with errors.xml", x, 0);
+    if(find_errors("D:/ASU/7/DS/Project notes/sample.xml", x, 1))cout<<"Formatting fault"<<endl;
+    cout << "Number of errors : " << error_list.size() << endl;
     for (auto a : error_list)
     {
         cout << a << endl;

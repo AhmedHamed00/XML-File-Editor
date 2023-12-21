@@ -47,9 +47,10 @@ public:
 	TAG_TYPE type;
 	int line;
 	bool found;
-
-	xml_tag(const string& tag_name, const TAG_TYPE& type, int line, bool found)
-		: tag_name(tag_name), type(type), line(line), found(found)
+	int line_size;
+	streampos line_add;
+	xml_tag(const string& tag_name, const TAG_TYPE& type, int line, bool found,int line_size,streampos line_add)
+		: tag_name(tag_name), type(type), line(line), found(found), line_size(line_size), line_add(line_add)
 	{
 	}
 	bool operator>(const xml_tag& a);
@@ -62,4 +63,5 @@ extern vector<pair<xml_tag, xml_tag>> missing_opening;
 extern vector<pair<xml_tag, xml_tag>> missing_closing;
 extern vector<pair<xml_tag, xml_tag>> mismatch_error;
 
-void find_errors(string file_path, uint8_t& success, int check_flag);
+uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
+//this flag(return value) means that the errors are found but cant be corrected as the file formatting is hard to correct
