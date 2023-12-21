@@ -152,7 +152,7 @@ uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
 						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false, \
 							search_text.size(), file.tellg());
 					else
-						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, current_tag.line, false, \
+						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, 0, false, \
 							search_text.size(), file.tellg());
 					tag_pair.second = current_tag;
 					missing_opening.push_back(tag_pair);
@@ -168,6 +168,7 @@ uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
 		//if no errors was found
 		if (missing_opening.empty())
 		{
+			//TODO:check again for the line numbers when correcting
 			//add error to mising closing 
 			tag_pair.first = tags.top();
 			tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, tags.top().line, \
