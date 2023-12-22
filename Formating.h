@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 using namespace std;
 typedef struct node {
     char valid_data = 0;
@@ -10,8 +12,8 @@ typedef struct node {
     long long occure = 0;
     node* perant = 0;
     char direction;
-    node* left=0;
-    node* right = 0;
+    node* left=NULL;
+    node* right = NULL;
 } node;
 typedef struct tree {
     node* head;
@@ -22,18 +24,10 @@ typedef struct tree {
  * Inputs:
  *		  input-> the xml file read into a char vector
  */
-void minify(vector<char>& input);
-
-/*
- * Description :
- * Functional responsible for comoressing the XML filr:
- * Inputs:
- *		  input-> the xml file read into a char vector
- */
-void compress(vector<char>& input);
-void save_compressed_file(vector<char>& input, vector<char [2]> key, vector<vector<int> > index);
-void compress_hoffman_encoding(vector<char>& input, vector<char>& output, tree& hoffman);
-void decompress(vector<char>& input, vector<char>& output, tree& hoffman);
+void _Minify(vector<char>& input);
+void Save_Hoffman_Tree(vector<char>& input, vector<char>& input2, string name, string name2);
+void Compress_Using_Hoffman_Coding(vector<char>& input, vector<char>& output, tree& hoffman);
+void Decompress_Hoffman_Coding(vector<char>& output, string tree_file_name, string coded_text);
 
 
 #endif /* Formating */

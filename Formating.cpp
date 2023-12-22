@@ -7,8 +7,7 @@
  * Inputs:
  *		  input-> the xml file read into a char vector
  */
-
-void minify(vector<char>& input)
+void _Minify(vector<char>& input)
 {
 	for (unsigned int i = 0; i < input.size(); i++)
 	{
@@ -35,7 +34,7 @@ bool compareBycount(node* a,node* b)
 {
 	return a->occure > b->occure;
 }
-void compress_hoffman_encoding(vector<char>& input, vector<char>& output,tree& hoffman)
+void Compress_Using_Hoffman_Coding(vector<char>& input, vector<char>& output,tree& hoffman)
 {
 	vector<node *> letters_nodes;
 	vector<node *> letters_nodes_copy;
@@ -129,9 +128,106 @@ void compress_hoffman_encoding(vector<char>& input, vector<char>& output,tree& h
 		
 	output.push_back(result);
 	output.push_back(8-bitss.size());
+	vector<char> saved_tree;
+	for (int i = 0; i < numbre_of_nodes; i++)
+	{
+		saved_tree.push_back(letters_nodes_copy[i]->data);
+		if (letters_nodes_copy[i]->occure<255)
+		{
+			saved_tree.push_back(1);
+			saved_tree.push_back(letters_nodes_copy[i]->occure);
+		}
+		else if (letters_nodes_copy[i]->occure < 25563)
+		{
+			saved_tree.push_back(2);
+			saved_tree.push_back(letters_nodes_copy[i]->occure&0x0000FFFF );
+			saved_tree.push_back(letters_nodes_copy[i]->occure>>8);
+
+		}
+		else if (letters_nodes_copy[i]->occure < 255)
+		{
+			saved_tree.push_back(4);
+			saved_tree.push_back((letters_nodes_copy[i]->occure & 0x000000000000FFFF));
+			saved_tree.push_back((letters_nodes_copy[i]->occure & 0x00000000FFFF0000 )>> 8);
+			saved_tree.push_back((letters_nodes_copy[i]->occure & 0x0000FFFF00000000)>>16);
+			saved_tree.push_back(letters_nodes_copy[i]->occure >> 24);
+
+		}
+		
+	}
+	Save_Hoffman_Tree(saved_tree,output, "Hoffman_Tree.txt","Hoffman_Coded_Output.txt");
+	for (int i=0;i< letters_nodes_copy.size();i++)
+	{
+		free(letters_nodes_copy[i]);
+	}
+	
 }
-void decompress(vector<char>& input, vector<char>& output, tree& hoffman)
+void Decompress_Hoffman_Coding( vector<char>& output,string tree_file_name,string coded_text)
 {
+	ifstream test;
+	test.open(coded_text, std::ios_base::in | std::ios::binary);
+	vector<char> input;
+	char ch;
+	while (test.get(ch)) {
+		input.push_back(ch);
+	}
+	test.close();
+	ifstream test2;
+	test2.open(tree_file_name, std::ios_base::in | std::ios::binary);
+	vector<char> tree_input;
+	while (test2.get(ch)) {
+		tree_input.push_back(ch);
+	}
+	test2.close();
+	vector<node*> letters_nodes;
+	vector<node*> letters_nodes_copy;
+	for(int i=0;i<tree_input.size();i++)
+	{
+		letters_nodes.push_back((node*)malloc(sizeof(node)));
+		letters_nodes_copy.push_back(letters_nodes[letters_nodes.size() - 1]);
+		letters_nodes[letters_nodes.size() - 1]->data = tree_input[i];
+		letters_nodes[letters_nodes.size() - 1]->valid_data = 2;
+		long long temp=0;
+		if (tree_input[i + 1] == 1)
+		{
+			temp |= (unsigned char)tree_input[i + 2];
+			i += 2;
+		}
+		else if (tree_input[i + 1] == 2)
+		{
+			temp |= (unsigned char)tree_input[i + 2];
+			temp |= (unsigned char)tree_input[i + 3]<<8;
+			i += 3;
+		}
+		else if (tree_input[i+1]==4)
+		{
+			temp |= (unsigned char)tree_input[i + 2];
+			temp |= (unsigned char)tree_input[i + 3] << 8;
+			temp |= (unsigned char)tree_input[i + 4]<<16;
+			temp |= (unsigned char)tree_input[i + 5] <<24;
+			i += 5;
+		}
+		letters_nodes[letters_nodes.size() - 1]->occure = temp;
+	}
+	int numbre_of_nodes = letters_nodes.size();
+	sort(letters_nodes.begin(), letters_nodes.end(), compareBycount);
+	while (letters_nodes.size() > 1)
+	{
+		node* x = (node*)malloc(sizeof(node));
+		x->data = -1;
+		x->occure = letters_nodes[letters_nodes.size() - 1]->occure + letters_nodes[letters_nodes.size() - 2]->occure;
+		x->left = letters_nodes[letters_nodes.size() - 1];
+		letters_nodes[letters_nodes.size() - 1]->perant = x;
+		letters_nodes[letters_nodes.size() - 1]->direction = 0;
+		x->right = letters_nodes[letters_nodes.size() - 2];
+		letters_nodes[letters_nodes.size() - 2]->perant = x;
+		letters_nodes[letters_nodes.size() - 2]->direction = 1;
+		letters_nodes.pop_back();
+		letters_nodes.pop_back();
+		letters_nodes.push_back(x);
+		letters_nodes_copy.push_back(x);
+		sort(letters_nodes.begin(), letters_nodes.end(), compareBycount);
+	}
 	vector<char> x;
 	for (int i = 0; i < input.size()-1; i++)
 	{
@@ -140,19 +236,19 @@ void decompress(vector<char>& input, vector<char>& output, tree& hoffman)
 			x.insert(x.end(),GET_BIT(input[i], j));
 		}
 	}
-	node* z = hoffman.head;
+	node* z =letters_nodes[0];
 	for (long long i = 0; i <= x.size()- input[input.size() - 1]; i++)
 	{
 		if (z->data < 0)
 		{
 			if (x[i] == 0)
 			{
-				if(z->left!=0)
+				if(z->left!= nullptr)
 				z = z->left;
 			}
 			else
 			{
-				if (z->left != 0)
+				if (z->left != nullptr)
 				z = z->right;
 			}
 		}
@@ -160,60 +256,27 @@ void decompress(vector<char>& input, vector<char>& output, tree& hoffman)
 		{
 			if (z->left != 0)
 			output.insert(output.end(),z->data);
-			z = hoffman.head;
+			z = letters_nodes[0];
 			i--;
 		}
 	}
 	output;
 	x;
 }
-void compress(vector<char>& input)
+void Save_Hoffman_Tree(vector<char>& input, vector<char>& input2,string name, string name2)
 {
-	char count = -1;
-	vector<vector<char>> key;
-	vector<char> value;
-	
-	char general_flag = 1;
-	while (general_flag == 1)
+	ofstream Hoffman_Coding_File;
+	Hoffman_Coding_File.open(name2, std::ios_base::out | std::ios::binary);
+	for (int i = 0; i < input2.size(); i++)
 	{
-		general_flag = 0;
-
-		for (unsigned int i = 0; i < input.size() - 4; i++)
-		{
-			char addition_flag = 0;
-			vector<char> temp{ input[i],input[i + 1] };
-			for (unsigned int j = i + 2; j < input.size() - 1; j++)
-			{
-				if (temp[0] == input[j] && temp[1] == input[j + 1])
-				{
-					if (addition_flag == 0)
-					{
-						addition_flag = 1;
-						value.push_back(count);
-						key.push_back(temp);
-					}
-					input[j] = count;
-					input.erase(input.begin() + j + 1);
-				}
-			}
-			if (addition_flag == 1)
-			{
-				input[i] = count;
-				input.erase(input.begin() + i + 1);
-				count--;
-				general_flag = 1;
-			}
-			if (count < -127)
-			{
-				break;
-			}
-
-		}
+		Hoffman_Coding_File << input2[i];
 	}
-
-}
-
-void save_compressed_file(vector<char>& input, vector<char [2]> key, vector<vector<int> > index)
-{
-
+	Hoffman_Coding_File.close();
+	ofstream Hoffman_Tree_File;
+	Hoffman_Tree_File.open(name, std::ios_base::out | std::ios::binary);
+	for (int i =0;i<input.size();i++)
+	{
+		Hoffman_Tree_File << input[i];
+	}
+	Hoffman_Tree_File.close();
 }
