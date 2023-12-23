@@ -1,10 +1,24 @@
-﻿  Error-handling.cpp
-  error_handling.cpp
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(13,15): warning C4129: '/': unrecognized character escape sequence
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(38,19): warning C4129: '/': unrecognized character escape sequence
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(188,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(212,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(214,9): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(217,12): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  Generating Code...
+﻿  error_handling.cpp
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(28,8): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(29,8): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(72,25): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(108,15): warning C4129: '/': unrecognized character escape sequence
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(127,22): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(130,22): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(144,19): warning C4129: '/': unrecognized character escape sequence
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(215,1): warning C4010: single-line comment contains line-continuation character
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(249,22): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(252,22): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(276,24): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(279,24): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(319,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(343,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(345,9): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(348,12): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(455,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(459,24): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(469,32): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(475,40): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(483,39): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(487,25): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
   Error-handling.vcxproj -> D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\Error-handling\x64\Debug\Error-handling.exe

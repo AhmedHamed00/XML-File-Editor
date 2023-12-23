@@ -19,7 +19,7 @@ enum class ERROR_MAIN_TYPE :uint8_t
 };
 enum class TAG_TYPE :uint8_t
 {
-	OPENING_TAG, CLOSING_TAG
+	OPENING_TAG, CLOSING_TAG, M_OPEN_BRACKET, M_CLOSE_BRACKET
 };
 
 class xml_error
@@ -62,6 +62,8 @@ extern vector<xml_error> error_list;
 extern vector<pair<xml_tag, xml_tag>> missing_opening;
 extern vector<pair<xml_tag, xml_tag>> missing_closing;
 extern vector<pair<xml_tag, xml_tag>> mismatch_error;
+extern vector<xml_tag> missing_bracket;
 
-uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
 //this flag(return value) means that the errors are found but cant be corrected as the file formatting is hard to correct
+uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
+void solve_missingBracket(fstream& file);
