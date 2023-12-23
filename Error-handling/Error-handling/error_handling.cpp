@@ -57,7 +57,7 @@ static int lev_dist(string str1,string str2)
 }
 
 //this funciton checks if a unkown tag could be corrected
-static bool spelling_error_check(xml_tag tag)
+static bool spelling_error_check(xml_tag& tag)
 {
 	string str = tag.tag_name;
 	//remove white spaces in tag
@@ -81,12 +81,13 @@ static bool spelling_error_check(xml_tag tag)
 	//if the min distance is less than 3 it could be corrected
 	if (min <= 3)
 	{
-		string err = "Tag : \"" + tag.tag_name + "\" is misspelled, did you mean \""+tag_list[min_i]+"\" ?";
+		string err = "Tag : \"" + tag.tag_name + "\" is unkown, did you mean \""+tag_list[min_i]+"\" ?";
 		error_list.push_back(xml_error(ERROR_TYPE::UNKNOWN_TAG, ERROR_MAIN_TYPE::LOGICAL, true, tag.line, err));
 		pair<xml_tag, string> pair;
 		pair.first = tag;
 		pair.second = tag_list[min_i];
 		misspelled_tags.push_back(pair);
+		tag.tag_name = tag_list[min_i];
 		return true;
 	}
 	return false;
