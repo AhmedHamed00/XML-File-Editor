@@ -36,7 +36,6 @@ public:
 	{
 	}
 	friend ostream& operator << (ostream& out, const xml_error& c);
-
 	xml_error() = default;
 };
 
@@ -47,14 +46,10 @@ public:
 	TAG_TYPE type;
 	int line;
 	bool found;
-	int line_size;
-	streampos line_add;
-	xml_tag(const string& tag_name, const TAG_TYPE& type, int line, bool found,int line_size,streampos line_add)
-		: tag_name(tag_name), type(type), line(line), found(found), line_size(line_size), line_add(line_add)
+	xml_tag(const string& tag_name, const TAG_TYPE& type, int line, bool found)
+		: tag_name(tag_name), type(type), line(line), found(found)
 	{
 	}
-	bool operator>(const xml_tag& a);
-	bool operator<(const xml_tag& a);
 	xml_tag() = default;
 };
 
@@ -66,4 +61,3 @@ extern vector<xml_tag> missing_bracket;
 
 //this flag(return value) means that the errors are found but cant be corrected as the file formatting is hard to correct
 uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
-void solve_missingBracket(fstream& file);
