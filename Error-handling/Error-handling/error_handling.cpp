@@ -108,14 +108,13 @@ static bool find_bracket_error(string path)
 	}
 	string parsed;
 	smatch s;
-	regex search("(<\/?[a-zA-Z]+)(?![a-zA-Z]*>)|([ \t]\/?[a-zA-Z]+>)|(>[ a-zA-Z1-9]+\/?[a-zA-A]+>)");
+	regex search("(</?[a-zA-Z]+)(?![a-zA-Z]*>)|([ \t]/?[a-zA-Z/0-9]+>)|(>[ a-zA-Z1-9]+/?[a-zA-Z0-9/]+>)");
 	int line = 0;
 	while (file)
 	{
 		vector<string> m;
-		streampos a = file.tellg();
 		getline(file, search_text);
-		a = file.tellg();
+		string_file.push_back(search_text);
 		parsed = search_text;
 		while (regex_search(parsed, s, search))
 		{
@@ -396,6 +395,8 @@ uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
 			return multiTagLine_ERR;
 		}
 	}
+	string_file.clear();
+	string_file.shrink_to_fit();
 	ifstream file(file_path);
 	if (!file.is_open())
 	{
@@ -490,3 +491,71 @@ bool operator<(const xml_error& a, const xml_error& b)
 /****************************************************************************************************************************
 *												   error correction
 *****************************************************************************************************************************/
+void writeFile()
+{
+	ofstream file(input_file_path, ofstream::trunc | ofstream::out);
+	for (int i = 0; i < string_file.size(); i++)
+	{
+		file << string_file[i] << endl;
+	}
+	file.close();
+}
+void solve_missingBracket()
+{
+	int prev_line = missing_bracket[0].line;
+	int last_in = 0;
+	for (int i = 0; i < missing_bracket.size(); i++)
+	{
+		if (missing_bracket[i].line != prev_line)
+		{
+			prev_line = missing_bracket[i].line;
+			last_in = 0;
+		}
+		//find the tag with the missing bracket in the full line
+		int insert_at = string_file[prev_line].find(missing_bracket[i].tag_name, last_in);
+		if (missing_bracket[i].type == TAG_TYPE::M_CLOSE_BRACKET)
+		{
+			string_file[prev_line].insert(string_file[prev_line].begin() + insert_at + \
+				missing_bracket[i].tag_name.size(), '>');
+			last_in += insert_at + missing_bracket[i].tag_name.size();
+		}
+		else
+		{//missing open bracket
+			//either found a space or tab or found a closing bracket
+			if ((missing_bracket[i].tag_name[0] == '>') && (string_file[prev_line].find_last_of('/') != -1))
+			{//if found a closing bracket and a fwd slash
+				//look /
+				insert_at = string_file[prev_line].find_last_of('/');
+				//insert before the /
+				string_file[prev_line].insert(string_file[prev_line].begin() + insert_at, '<');
+				last_in = insert_at;
+			}
+			else
+			{//replace the space or tab insert before the /
+				//replace the last space or tab or insert before the /
+				int start = string_file[prev_line].find(missing_bracket[i].tag_name);
+				int end = start + missing_bracket[i].tag_name.size();
+				for (insert_at = end; insert_at > start; insert_at--)
+					if ((string_file[prev_line][insert_at] == ' ') || (string_file[prev_line][insert_at] == '\t') || \
+						(string_file[prev_line][insert_at] == '/'))break;
+				//replace after the last space or insert before the /
+				if (string_file[prev_line][insert_at] == '/')
+					string_file[prev_line].insert(string_file[prev_line].begin() + insert_at, '<');
+				else
+					string_file[prev_line][insert_at] = '<';
+			}
+			last_in += insert_at + missing_bracket[i].tag_name.size();
+		}
+	}
+}
+void solve_missingClose()
+{
+	for (int i = 0; i < missing_closing.size(); i++)
+	{
+		string closing_tag = "</" + missing_closing[i].second.tag_name + ">";
+		int insert_at = max(static_cast<int>(string_file[missing_closing[i].second.line].find_last_of(' ')), \
+			static_cast<int>(string_file[missing_closing[i].second.line].find_last_of('\t')));
+		string_file[missing_closing[i].second.line].insert(insert_at, closing_tag);
+	}
+}
+

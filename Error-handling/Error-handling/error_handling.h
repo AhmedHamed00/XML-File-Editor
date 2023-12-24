@@ -61,3 +61,11 @@ extern vector<xml_tag> missing_bracket;
 
 //this flag(return value) means that the errors are found but cant be corrected as the file formatting is hard to correct
 uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
+
+/****************************************************************************************************************************
+*                                                   error correction
+*****************************************************************************************************************************/
+
+void solve_missingBracket();
+void writeFile();
+void solve_missingClose();
