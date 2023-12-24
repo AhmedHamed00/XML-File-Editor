@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : DataStructureProjectPrettifyingTrial.cpp
+// Name        : Prettify.cpp
 // Author      : Noha Adel ~.~
 // Version     :
 // Copyright   : Your copyright notice
@@ -156,10 +156,12 @@ void prettifyXML(const string& inputFileName, const string& outputFileName) {
 
 }
 
+/*
 int main() {
 
 	separateTags("src/input.xml", "src/sep_output.xml");
 	prettifyXML("src/sep_output.xml", "src/output.xml");
 
 	return 0;
-}
+}*/
+
