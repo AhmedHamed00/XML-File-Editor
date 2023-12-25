@@ -7,7 +7,6 @@
 #include <vector>
 #include <stack>
 
-#define ALL_OPERATIONS 5
 typedef enum {
     error_checking,error_correction,
     formatting, compressing,decompressing,original
@@ -15,6 +14,7 @@ typedef enum {
 
 std::stack <std::pair<QString,operation>> undo_stack;
 std::stack <std::pair<QString,operation>> redo_stack;
+
 std::pair <QString,operation> undo_redo;
 
 
@@ -166,15 +166,9 @@ void XML_project::on_error_check_button_clicked()
 
 void XML_project::on_error_correct_button_clicked()
 {
-
-    if(!redo_stack.empty())
+    while(!redo_stack.empty())
     {
-        undo_stack.pop();
-        while(!redo_stack.empty())
-        {
-            undo_stack.push(redo_stack.top());
-            redo_stack.pop();
-        }
+        redo_stack.pop();
     }
     ui->actionRedo->setEnabled(false);
     ui->actionundo->setEnabled(true);
@@ -188,8 +182,7 @@ void XML_project::on_error_correct_button_clicked()
     ui->compress_button->setEnabled(true);
     ui->graph_button->setEnabled(true);
     ui->format_button->setEnabled(true);
-
-
+    ui->details_button->setEnabled(true);
 }
 
 
@@ -201,14 +194,10 @@ void XML_project::on_jason_button_clicked()
 
 void XML_project::on_format_button_clicked()
 {
-    if(!redo_stack.empty())
+
+    while(!redo_stack.empty())
     {
-        undo_stack.pop();
-        while(!redo_stack.empty())
-        {
-            undo_stack.push(redo_stack.top());
-            redo_stack.pop();
-        }
+        redo_stack.pop();
     }
     ui->actionRedo->setEnabled(false);
     ui->actionundo->setEnabled(true);
@@ -223,14 +212,10 @@ void XML_project::on_format_button_clicked()
 
 void XML_project::on_compress_button_clicked()
 {
-    if(!redo_stack.empty())
+
+    while(!redo_stack.empty())
     {
-        undo_stack.pop();
-        while(!redo_stack.empty())
-        {
-            undo_stack.push(redo_stack.top());
-            redo_stack.pop();
-        }
+        redo_stack.pop();
     }
     ui->compress_button->setEnabled(false);
     ui->decompress_button->setEnabled(true);
@@ -248,14 +233,10 @@ void XML_project::on_compress_button_clicked()
 
 void XML_project::on_decompress_button_clicked()
 {
-    if(!redo_stack.empty())
+
+    while(!redo_stack.empty())
     {
-        undo_stack.pop();
-        while(!redo_stack.empty())
-        {
-            undo_stack.push(redo_stack.top());
-            redo_stack.pop();
-        }
+        redo_stack.pop();
     }
     ui->compress_button->setEnabled(true);
     ui->decompress_button->setEnabled(false);
@@ -300,6 +281,7 @@ void XML_project::on_actionundo_triggered()
         ui->format_button->setEnabled(false);
         ui->graph_button->setEnabled(false);
         ui->details_button->setEnabled(false);
+        ui->jason_button->setEnabled(false);
     }
     else if(undo_stack.top().second==compressing)
     {
@@ -319,6 +301,7 @@ void XML_project::on_actionundo_triggered()
     redo_stack.push(undo_stack.top());
     undo_stack.pop();
     text=undo_stack.top().first;
+    //type text to file
     ui->actionRedo->setEnabled(true);
     ui->textEdit->setText(text);
     if(undo_stack.top().second==error_checking)
@@ -349,11 +332,12 @@ void XML_project::on_actionRedo_triggered()
     {
 
         ui->error_correct_button->setEnabled(false);
-        ui->decompress_button->setEnabled(true);
         ui->compress_button->setEnabled(true);
+        ui->decompress_button->setEnabled(false);
         ui->format_button->setEnabled(true);
         ui->graph_button->setEnabled(true);
         ui->details_button->setEnabled(true);
+        ui->jason_button->setEnabled(true);
     }
 
     else if(redo_stack.top().second==compressing)
@@ -375,6 +359,7 @@ void XML_project::on_actionRedo_triggered()
     redo_stack.pop();
     text=undo_stack.top().first;
     ui->actionundo->setEnabled(true);
+    //type text to file
     ui->textEdit->setText(text);
     if(undo_stack.top().second==error_checking)
     {
@@ -385,5 +370,6 @@ void XML_project::on_actionRedo_triggered()
     {
         ui->actionRedo->setEnabled(false);
     }
+
 }
 
