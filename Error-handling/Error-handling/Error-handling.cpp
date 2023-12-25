@@ -11,8 +11,7 @@ int main()
     {
         cout << a << endl;
     }
-    solve_missingClose();
-    writeFile();
+    solve_errors();
     return 0;
 }
 

@@ -316,11 +316,13 @@ static void parse_missingClose(stack<xml_tag>& tags)
 }
 
 //this function finds all missing open tags
-static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTagLine_ERR)
+static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTagLine_ERR,bool only_missing_open)
 {
 	int line = 0;
 	vector<string> string_tags;
 	pair<xml_tag, xml_tag> tag_pair;
+	stack<int> missing_opening_line_tracker;
+	missing_opening_line_tracker.push(0);
 	xml_tag current_tag;
 	while (file)
 	{
@@ -348,18 +350,32 @@ static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTag
 
 			//check if it is a closing tag or openning tag
 			if (current_tag.type == TAG_TYPE::OPENING_TAG)
+			{
 				tags.push(current_tag);
+				missing_opening_line_tracker.push(current_tag.line);
+			}
 			else
 			{
 				//if the same tag is on top of the stack just pop the tag
 				if (!tags.empty() && tags.top().tag_name == current_tag.tag_name)
+				{
+					missing_opening_line_tracker.pop();
+					missing_opening_line_tracker.pop();
+					int o_line = tags.top().line;
+					if (current_tag.line == tags.top().line)
+						o_line++;
+					missing_opening_line_tracker.push(o_line);
 					tags.pop();
+				}
 				else
 				{
-					if (!tags.empty())
-						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false);
-					else
+					if (tags.empty())
 						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, 0, false);
+					else if(only_missing_open==false)
+						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false);
+					else if(only_missing_open==true)
+						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, \
+							missing_opening_line_tracker.top(), false);
 					tag_pair.second = current_tag;
 					missing_opening.push_back(tag_pair);
 				}
@@ -409,7 +425,7 @@ uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
 
 	stack<xml_tag> tags;
 	//find mising opening
-	parse_missingOpen(tags, file, multiTagLine_ERR);
+	parse_missingOpen(tags, file, multiTagLine_ERR,false);
 	//find missing closing
 	parse_missingClose(tags);
 	//sort the arrays to use binary search
@@ -491,7 +507,152 @@ bool operator<(const xml_error& a, const xml_error& b)
 /****************************************************************************************************************************
 *												   error correction
 *****************************************************************************************************************************/
-void writeFile()
+static string vec_to_str(vector<string>& content)
+{
+	string res;
+	for (string line : content)
+	{
+		res += line;
+	}
+	return res;
+}
+static vector<string> get_tags_vec(vector<string>& str)
+{//this function returns all the tags in the vector of strings
+	vector<string> res;
+	for (int i = str.size() - 1; i >= 0; i--)
+	{//bgeeb el tagss mn t7t l fo2
+		vector<string> tags_inLine;
+		tags_inLine = get_tags(str[i]);
+		res.insert(res.begin(), tags_inLine.begin(), tags_inLine.end());
+	}
+	return res;
+}
+static int check_tagContent(string& open,string& close,vector<string>& content)
+{//return 1 if the tag should be the opening tag,2 if it should be the closing tag,return 0 if needs more info
+	vector<string> content_tags = get_tags_vec(content);
+	int close_match = 0;
+	int open_match = 0;
+	int done_flag = 0;
+	//vectors to hold the nesting values
+	//TODO:use another header file for abstraction
+	vector<string> topics_nest = { "topics","topic" };
+	vector<string> follower_nest = { "follower","id" };
+	vector<string> followers_nest = { "followers","follower" };
+	vector<string> post_nest = { "post","topics","body" };
+	vector<string> posts_nest = { "posts","post" };
+	vector<string> user_nest = { "user","id","name","followers","posts" };
+	vector<string> users_nest = { "users","user" };
+	vector<vector<string>> nesting_lists = { topics_nest,follower_nest,followers_nest,post_nest,posts_nest,\
+		user_nest,users_nest };
+	if (content_tags.size())
+	{//has tags in between
+		//check the nesting
+		for (string tag : content_tags)
+		{
+			string last_tag;
+			if (tag[1] == '/')
+				last_tag = tag.substr(2, tag.size() - 3);
+			else
+				last_tag = tag.substr(1, tag.length() - 2);
+
+			for (int i = 0; i < nesting_lists.size(); i++)
+			{
+				//check the nesting with respect to the closing tag
+				if (nesting_lists[i][0] == close)
+				{
+					for (int o = 1; o < nesting_lists[i].size(); o++)
+					{
+						if (nesting_lists[i][o] == last_tag)
+						{
+							close_match++;
+							done_flag++;
+							break;
+						}
+					}
+				}
+				//check the nesting with respect to the opening tag
+				else if (nesting_lists[i][0] == open)
+				{
+					for (int o = 1; o < nesting_lists[i].size(); o++)
+					{
+						if (nesting_lists[i][o] == last_tag)
+						{
+							open_match++;
+							done_flag++;
+							break;
+						}
+					}
+				}
+				if (done_flag == 2)
+					break;
+			}
+		}
+		if (close_match > open_match)return 2;
+		if (close_match < open_match)return 1;
+		else return 0;
+	}
+	else
+	{//no tags in between only text
+		//when only text then the tag could be topic,name,id,body
+		// first look if one of the tags is a nested tag
+		bool found_open = false, found_close = false;
+		for (int i=0;i<nesting_lists.size();i++)
+		{
+			if (nesting_lists[i][0] == open)
+				found_open = true;
+			else if (nesting_lists[i][0] == close)
+				found_close = true;
+		}
+		if (found_close && !found_open)
+			//the open tag is the correct one
+			return 1;
+		if (!found_close && found_close)
+			//the close tag is the correct one
+			return 2;
+
+		//else
+		//get all the content in one line string to search using regex
+		string string_content = vec_to_str(content);
+		regex id_serach("^[ \t]*\d+[ \t]*$");//only digits with whitespaces b4 and after
+		if (regex_match(string_content, id_serach))
+		{
+			//the content is only numbers
+			//we give higher prio to id
+			if (open == "id")return 1;
+			else if (close == "id")return 2;
+			//now it cant be name or topic
+			//so if it is not body its an error
+			else if (open == "body")return 1;
+			else if (close == "body")return 2;
+			else return 0;
+		}
+		//its not id
+		//if any numbers its body
+		smatch s;
+		if(regex_search(string_content,s, regex("[\d,\.\?!]")))
+		{//its body or error
+			if (open == "body")return 1;
+			else if (close == "body")return 2;
+			else return 0;
+		}
+		//now we have no idea what the tag is so return error
+		return 0;
+	}
+	return true;
+}
+static void replace_closing(int i)
+{
+	int insert_at = string_file[mismatch_error[i].second.line].find("</" + mismatch_error[i].second.tag_name + ">");
+	string_file[mismatch_error[i].second.line].replace(insert_at + 2, mismatch_error[i].second.tag_name.size(), \
+		mismatch_error[i].first.tag_name);
+}
+static void replace_opening(int i)
+{
+	int insert_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
+	string_file[misspelled_tags[i].first.line].replace(insert_at + 1, mismatch_error[i].first.tag_name.size(), \
+		mismatch_error[i].second.tag_name);
+}
+static void writeFile()
 {
 	ofstream file(input_file_path, ofstream::trunc | ofstream::out);
 	for (int i = 0; i < string_file.size(); i++)
@@ -500,7 +661,7 @@ void writeFile()
 	}
 	file.close();
 }
-void solve_missingBracket()
+static void solve_missingBracket()
 {
 	int prev_line = missing_bracket[0].line;
 	int last_in = 0;
@@ -548,14 +709,114 @@ void solve_missingBracket()
 		}
 	}
 }
-void solve_missingClose()
+static  void solve_missingClose()
 {
 	for (int i = 0; i < missing_closing.size(); i++)
 	{
-		string closing_tag = "</" + missing_closing[i].second.tag_name + ">";
-		int insert_at = max(static_cast<int>(string_file[missing_closing[i].second.line].find_last_of(' ')), \
-			static_cast<int>(string_file[missing_closing[i].second.line].find_last_of('\t')));
+		string closing_tag = "</" + missing_closing[i].second.tag_name + ">\n";
+		int insert_at = string_file[missing_closing[i].second.line].find_first_not_of(" \t");
 		string_file[missing_closing[i].second.line].insert(insert_at, closing_tag);
 	}
 }
+static void solve_missingOpen()
+{
+	for (int i = 0; i < missing_opening.size(); i++)
+	{
+		string opening_tag = "<" + missing_opening[i].second.tag_name + ">\n";
+		int insert_at = string_file[missing_opening[i].first.line].find_first_not_of(" \t");
+		string_file[missing_opening[i].first.line].insert(insert_at, opening_tag);
+	}
+}
+static bool solve_mismatch()
+{
+	for (int i = mismatch_error.size() - 1; i >= 0; i--)
+	{
+		if ((!is_inTagList(mismatch_error[i].first.tag_name)) && (!is_inTagList(mismatch_error[i].second.tag_name)))
+			return false;
+		if ((!is_inTagList(mismatch_error[i].first.tag_name)) || (!is_inTagList(mismatch_error[i].second.tag_name)))
+		{//if one of the tags in not in the tag list then change it to the other
+			if (is_inTagList(mismatch_error[i].first.tag_name))
+				//the closing tag is not in the list,replace the closing tag with the opening tag
+				replace_closing(i);
+			else//the opening tag is not in the list,replace the opening tag with the closing tag
+				replace_opening(i);
+			continue;
+		}
+		vector<string> content;
+		if (mismatch_error[i].first.line == mismatch_error[i].second.line)
+		{//if both tags are in the same line the content in between them
+			int start_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
+			int end_at = string_file[mismatch_error[i].second.line].find("</" + mismatch_error[i].second.tag_name + ">");
+			content.push_back(string_file[mismatch_error[i].first.line].substr(\
+				start_at + 2 + mismatch_error[i].first.tag_name.size(), \
+				end_at - (start_at + mismatch_error[i].first.tag_name.size() + 2)));
+		}
+		else
+		{
+			//get the rest of the first line
+			int str_at = string_file[mismatch_error[i].first.line].find_last_of("<" + mismatch_error[i].first.tag_name + ">");
+			content.push_back(string_file[mismatch_error[i].first.line].substr(str_at + 2 +\
+				mismatch_error[i].first.tag_name.size()));
+			//get all lines in the middle
+			for (int o = mismatch_error[i].first.line + 1; o < mismatch_error[i].second.line; o++)
+				content.push_back(string_file[o]);
+			//get the rest of the second line
+			str_at = string_file[mismatch_error[i].second.line].find("</" + mismatch_error[i].second.tag_name + ">");
+			content.push_back(string_file[mismatch_error[i].second.line].substr(0, str_at - 1));
+		}
+		//now we have the content between the tags we check to see which tag works best
+		if (check_tagContent(mismatch_error[i].first.tag_name, mismatch_error[i].second.tag_name, content) == 1)
+			//replace the closing tag with the opening tag
+			replace_closing(i);
+		else if (check_tagContent(mismatch_error[i].first.tag_name, mismatch_error[i].second.tag_name, content) == 2)
+			//replace the opening tag with the closing tag
+			replace_opening(i);
+		else return false;
+	}
+	return true;
+}
+static void solve_misspelling()
+{
+	for (int i = 0; i < misspelled_tags.size(); i++)
+	{
+		int insert_at = string_file[misspelled_tags[i].first.line].find(misspelled_tags[i].first.tag_name);
+		string_file[misspelled_tags[i].first.line].replace(insert_at, misspelled_tags[i].first.tag_name.size(), \
+			misspelled_tags[i].second);
+	}
+}
+bool solve_errors()
+{
+	if (misspelled_tags.size())
+		solve_misspelling();
 
+	if (missing_bracket.size())
+		solve_missingBracket();
+
+	if (missing_closing.size())
+		solve_missingClose();
+
+	writeFile();
+
+	if (mismatch_error.size())
+		if (solve_mismatch() == false)return false;
+
+	writeFile();
+
+	//TODO: 7ot kol dah f do while loop
+	//3l4an lw format error yb2a call a3ml format w arg3 loop tany
+	bool x=false;
+
+	missing_opening.clear();
+	missing_opening.shrink_to_fit();
+	stack<xml_tag> tags;
+	ifstream file(input_file_path);
+
+	string_file.clear();
+	parse_missingOpen(tags, file, x,true);
+	if (missing_opening.size())
+		solve_missingOpen();
+
+	//TODO:check for empty tags
+	writeFile();
+	return true;
+}

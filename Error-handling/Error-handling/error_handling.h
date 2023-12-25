@@ -66,6 +66,4 @@ uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
 *                                                   error correction
 *****************************************************************************************************************************/
 
-void solve_missingBracket();
-void writeFile();
-void solve_missingClose();
+bool solve_errors();
