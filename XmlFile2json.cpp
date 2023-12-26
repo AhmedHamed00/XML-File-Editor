@@ -25,7 +25,7 @@ bool check_equivalence(Node node1, Node node2) {
                 return false;
             }
         }
- // If all characters are equal up to the size of the second node's name, nodes are considered equivalent
+        // If all characters are equal up to the size of the second node's name, nodes are considered equivalent
 
         return true;
     }
@@ -34,20 +34,20 @@ bool check_equivalence(Node node1, Node node2) {
 // Function to trim leading and trailing whitespaces (spaces, tabs, and newlines) from a given string
 
 string trim(const string& str) {
-// Find the position of the first non-whitespace character in the string
+    // Find the position of the first non-whitespace character in the string
 
     size_t start = str.find_first_not_of(" \t\r\n");
-// Find the position of the last non-whitespace character in the string
+    // Find the position of the last non-whitespace character in the string
 
     size_t end = str.find_last_not_of(" \t\r\n");
-// Check if either the start or end position is not found, indicating an empty or all-whitespace string
+    // Check if either the start or end position is not found, indicating an empty or all-whitespace string
 
     if (start == string::npos || end == string::npos) {
-// Return an empty string if the input string is empty or contains only whitespaces
+        // Return an empty string if the input string is empty or contains only whitespaces
 
         return "";
     }
- // Extract the substring between the first and last non-whitespace characters (inclusive)
+    // Extract the substring between the first and last non-whitespace characters (inclusive)
 
     return str.substr(start, end - start + 1);
 }
@@ -69,7 +69,7 @@ void remove_spaces(string filename) {
     // Read each line from the file
     while (getline(file_without_spaces, first_line)) {
         // Trim leading and trailing whitespaces from the line
-          
+
 
         // Iterate through each character in the trimmed line
         for (int i = 0; i < first_line.length(); i++) {
@@ -209,18 +209,18 @@ void writeTreeToJSONFile(ofstream& outfile, Node& node, int count = 0, bool equa
             for (int i = 0; i < count; i++) {
                 outfile << "    ";
             }
-            outfile << node.Id;
+            outfile << char(34) << node.Id << char(34);
         }
         else {
             // If not equivalent, write the node's name, a colon, and the ID
             for (int i = 0; i < count; i++) {
                 outfile << "    ";
             }
-            outfile << char(34) << node.name << char(34) << ": " << node.Id;
+            outfile << char(34) << node.name << char(34) << ": " << char(34) << node.Id << char(34);
         }
     }
 }
-void  xmlFileToJson(string Path) 
+void  xmlFileToJson(string Path)
 {
     // Remove spaces from the input path
     remove_spaces(Path);
@@ -302,6 +302,7 @@ void  xmlFileToJson(string Path)
     }
 
     // Open the output file for writing JSON
+    // an example to test
     ofstream outputfile("C:/Users/karim/OneDrive/Documents/XmltoJson/XmlFile2json/sample.json");
     //ofstream outputjson( path_json);
     outputfile << '{' << endl;
@@ -310,15 +311,15 @@ void  xmlFileToJson(string Path)
     writeTreeToJSONFile(outputfile, node_stack.top());
 
     outputfile << endl << '}';
- 
+
 }
 
 
 int main(void) {
 
- 
-    xmlFileToJson("C:/Users/karim/OneDrive/Documents/XmltoJson/XmlFile2json/Sample.xml");//succeeded
-   
+    // to test this code
+    xmlFileToJson("C:/Users/karim/OneDrive/Documents/XmltoJson/XmlFile2json/Sample.xml");
+
 
     return 0;
 }
