@@ -3,7 +3,7 @@
 #define GET_BIT(REG,BIT) ( ( REG & (1<<BIT) ) >> BIT )
 /*
  * Description :
- * Functional responsible for Minifying the XML filr:
+ * Functional responsible for Minifying(removing all excess chars exept for body) the XML filr:
  * Inputs:
  *		  input-> the xml file read into a char vector
  */
@@ -30,12 +30,37 @@ void _Minify(vector<char>& input)
 		}
 	}
 }
+/*
+ * Description :
+ * Functional responsible for comparing two nodes by count:
+ * Inputs:
+ *		  a: first node
+ *		  b: second node
+ */
 bool compareBycount(node* a,node* b)
 {
 	return a->occure > b->occure;
 }
-void Compress_Using_Hoffman_Coding(vector<char>& input, vector<char>& output,tree& hoffman)
+/*
+ * Description :
+ * Functional responsible for compressing a file using hoffman code and saving the file into two files (the compressed data and decoding tree)
+ *	with total space less than original file:
+ * Inputs:
+ *		  input: the name of the file including bath
+ */
+void Compress_Using_Hoffman_Coding(string input_name)
 {
+	ifstream test;
+	test.open(input_name, std::ios_base::in | std::ios::binary);
+	vector<char> input;
+	char ch;
+	while (test.get(ch)) {
+		input.push_back(ch);
+	}
+	test.close();
+	_Minify(input);
+	vector<char> output;
+	tree hoffman;
 	vector<node *> letters_nodes;
 	vector<node *> letters_nodes_copy;
 	for (int j = 0; j < 127; j++)
@@ -155,13 +180,21 @@ void Compress_Using_Hoffman_Coding(vector<char>& input, vector<char>& output,tre
 		}
 		
 	}
-	Save_Hoffman_Tree(saved_tree,output, "Hoffman_Tree.txt","Hoffman_Coded_Output.txt");
+	Save_Hoffman_Tree_data(saved_tree,output, "Hoffman_Tree.txt","Hoffman_Coded_Output.txt");
 	for (int i=0;i< letters_nodes_copy.size();i++)
 	{
 		free(letters_nodes_copy[i]);
 	}
 	
 }
+/*
+ * Description :
+ * Functional responsible for decompressing a file using hoffman code 
+ * Inputs:
+ *		  output: the name of the file including bath
+ *		  tree_file_name: the file incloding hoffman tree
+ *		  coded_text: the text compressed by hoffman code
+ */
 void Decompress_Hoffman_Coding( vector<char>& output,string tree_file_name,string coded_text)
 {
 	ifstream test;
@@ -260,23 +293,30 @@ void Decompress_Hoffman_Coding( vector<char>& output,string tree_file_name,strin
 			i--;
 		}
 	}
-	output;
-	x;
 }
-void Save_Hoffman_Tree(vector<char>& input, vector<char>& input2,string name, string name2)
+/*
+ * Description :
+ * Functional responsible for save hoffman coded file and hoffmantreetree
+ * Inputs:
+ *		  input_tree: the hoffman tree data
+ *		  input_data: the hofman coded data
+ *		  hoffman_tree_file: hoffman tree file name
+ *		  hoffman_coded_file: coded data file name
+ */
+void Save_Hoffman_Tree_data(vector<char>& input_tree, vector<char>& input_data,string hoffman_tree_file, string hoffman_coded_fle)
 {
 	ofstream Hoffman_Coding_File;
-	Hoffman_Coding_File.open(name2, std::ios_base::out | std::ios::binary);
-	for (int i = 0; i < input2.size(); i++)
+	Hoffman_Coding_File.open(hoffman_coded_fle, std::ios_base::out | std::ios::binary);
+	for (int i = 0; i < input_data.size(); i++)
 	{
-		Hoffman_Coding_File << input2[i];
+		Hoffman_Coding_File << input_data[i];
 	}
 	Hoffman_Coding_File.close();
 	ofstream Hoffman_Tree_File;
-	Hoffman_Tree_File.open(name, std::ios_base::out | std::ios::binary);
-	for (int i =0;i<input.size();i++)
+	Hoffman_Tree_File.open(hoffman_tree_file, std::ios_base::out | std::ios::binary);
+	for (int i =0;i< input_tree.size();i++)
 	{
-		Hoffman_Tree_File << input[i];
+		Hoffman_Tree_File << input_tree[i];
 	}
 	Hoffman_Tree_File.close();
 }
