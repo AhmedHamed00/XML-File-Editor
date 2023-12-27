@@ -212,7 +212,7 @@ static void create_error()
 }
 
 //this fucntion finds every missing opening tag and missing closing tag in the same excat lines and creates a mismatch error 
-static void parse_misMatches(stack<xml_tag>& tags)
+static void parse_misMatches()
 {
 	//find mismatches
 	//a mismatch is when the same tag is a missing open and another tag is missing close and both are in the same line
@@ -254,6 +254,7 @@ static void parse_misMatches(stack<xml_tag>& tags)
 //this function loops on the stack and missing opening vector to get all missing closing tags
 static void parse_missingClose(stack<xml_tag>& tags)
 {
+	stack<int> missing_closing_line_tracker;
 	pair<xml_tag, xml_tag> tag_pair;
 	//find missing closing
 	while (!tags.empty())
@@ -261,10 +262,15 @@ static void parse_missingClose(stack<xml_tag>& tags)
 		//if no errors was found
 		if (missing_opening.empty())
 		{
-			//TODO:check again for the line numbers when correcting
 			//add error to mising closing 
 			tag_pair.first = tags.top();
-			tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, tags.top().line, false);
+			if(missing_closing_line_tracker.empty())
+				tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, tags.top().line, false);
+			else
+			{
+				tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, missing_closing_line_tracker.top(), false);
+				missing_closing_line_tracker.pop();
+			}
 			missing_closing.push_back(tag_pair);
 			tags.pop();
 		}
@@ -274,15 +280,49 @@ static void parse_missingClose(stack<xml_tag>& tags)
 			//if found it is a missing closing tag
 			if (missing_opening[i].first.line >= tags.top().line)
 			{
-				//add error to mising closing and remove it from missing opening 
-				tag_pair.first = tags.top();
-				tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, missing_opening[i].second.line, false);
-				missing_closing.push_back(tag_pair);
-				tags.pop();
+				if (missing_opening[i].first.line > tags.top().line && missing_opening[i].first.tag_name == \
+					tags.top().tag_name)
+				{
+					tags.pop();
+					missing_opening.erase(missing_opening.begin() + i);
+					break;
+				}
+				else
+				{
+					//add error to mising closing and remove it from missing opening 
+					tag_pair.first = tags.top();
+					if (missing_closing_line_tracker.empty())
+					{
+						if (missing_opening[i].first.line > tags.top().line)
+							tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, \
+								missing_opening[i].first.line, false);
+						else
+							tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, \
+								missing_opening[i].second.line, false);
+					}
+					else
+					{
+						tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, \
+							missing_closing_line_tracker.top()-1, false);
+						//missing_closing_line_tracker.pop();
+					}
+					missing_closing.push_back(tag_pair);
+					tags.pop();
+				}
+				if (!missing_closing_line_tracker.empty())missing_closing_line_tracker.pop();
 				//try to pop the stack
 				if (tags.empty())break;
+				int line_break = missing_opening[i].first.line;
+				bool break_flag = true;
+				if (i + 1 < missing_opening.size())
+				{
+					if (missing_opening[i].first.tag_name != tags.top().tag_name && \
+						missing_opening[i].first.line < missing_opening[i + 1].first.line)
+						break_flag = false;
+				}
 				for (int j = i; j < missing_opening.size(); j++)
 				{
+					if (break_flag && missing_opening[j].first.line > line_break)break;
 					if (tags.top().tag_name == missing_opening[j].first.tag_name)
 					{//before we pop we need to know if the tag is presend multible times in the vector 
 						//if it is the last occurance should be poped with the top of the stack but both sould be in the same line error
@@ -293,6 +333,7 @@ static void parse_missingClose(stack<xml_tag>& tags)
 							if (missing_opening[o].first.tag_name == missing_opening[j].first.tag_name)
 							{//we found the last one so we pop it 
 								repeated = true;
+								missing_closing_line_tracker.push(tags.top().line);
 								tags.pop();
 								missing_opening.erase(missing_opening.begin() + o);
 								j--;
@@ -301,6 +342,7 @@ static void parse_missingClose(stack<xml_tag>& tags)
 						}
 						if (!repeated)
 						{
+							missing_closing_line_tracker.push(tags.top().line-1);
 							tags.pop();
 							missing_opening.erase(missing_opening.begin() + j);
 							j--;
@@ -322,7 +364,7 @@ static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTag
 	vector<string> string_tags;
 	pair<xml_tag, xml_tag> tag_pair;
 	stack<int> missing_opening_line_tracker;
-	missing_opening_line_tracker.push(0);
+	missing_opening_line_tracker.push(-1);
 	xml_tag current_tag;
 	while (file)
 	{
@@ -330,6 +372,10 @@ static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTag
 		string_tags = get_tags(search_text);
 		string_file.push_back(search_text);
 		if (string_tags.size() > 2)multiTagLine_ERR = true;
+		if (string_tags.size() == 2)
+		{
+			//TODO:if there are 2 tags but they are not the same
+		}
 		for (string string_tag : string_tags)
 		{
 			//get tag type and create a tag object
@@ -362,8 +408,6 @@ static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTag
 					missing_opening_line_tracker.pop();
 					missing_opening_line_tracker.pop();
 					int o_line = tags.top().line;
-					if (current_tag.line == tags.top().line)
-						o_line++;
 					missing_opening_line_tracker.push(o_line);
 					tags.pop();
 				}
@@ -373,9 +417,12 @@ static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTag
 						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, 0, false);
 					else if(only_missing_open==false)
 						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false);
-					else if(only_missing_open==true)
+					else if (only_missing_open == true)
+					{
 						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, \
 							missing_opening_line_tracker.top(), false);
+						missing_opening_line_tracker.pop();
+					}
 					tag_pair.second = current_tag;
 					missing_opening.push_back(tag_pair);
 				}
@@ -425,14 +472,14 @@ uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
 
 	stack<xml_tag> tags;
 	//find mising opening
-	parse_missingOpen(tags, file, multiTagLine_ERR,false);
+	parse_missingOpen(tags, file, multiTagLine_ERR,true);
 	//find missing closing
 	parse_missingClose(tags);
 	//sort the arrays to use binary search
 	sort(missing_opening.begin(), missing_opening.end());
 	sort(missing_closing.begin(), missing_closing.end());
 	//find mismatches
-	parse_misMatches(tags);
+	parse_misMatches();
 	//create errors with messages to be displayed
 	create_error();
 	success = 1;
@@ -715,6 +762,7 @@ static  void solve_missingClose()
 	{
 		string closing_tag = "</" + missing_closing[i].second.tag_name + ">\n";
 		int insert_at = string_file[missing_closing[i].second.line].find_first_not_of(" \t");
+		if (insert_at == -1)insert_at = 0;
 		string_file[missing_closing[i].second.line].insert(insert_at, closing_tag);
 	}
 }
@@ -723,8 +771,10 @@ static void solve_missingOpen()
 	for (int i = 0; i < missing_opening.size(); i++)
 	{
 		string opening_tag = "<" + missing_opening[i].second.tag_name + ">\n";
-		int insert_at = string_file[missing_opening[i].first.line].find_first_not_of(" \t");
-		string_file[missing_opening[i].first.line].insert(insert_at, opening_tag);
+		if(missing_opening[i].first.line==-1)
+			string_file[0].insert(0,"\n" + opening_tag);
+		else
+			string_file[missing_opening[i].first.line].append("\n"+opening_tag);
 	}
 }
 static bool solve_mismatch()
@@ -754,7 +804,7 @@ static bool solve_mismatch()
 		else
 		{
 			//get the rest of the first line
-			int str_at = string_file[mismatch_error[i].first.line].find_last_of("<" + mismatch_error[i].first.tag_name + ">");
+			int str_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
 			content.push_back(string_file[mismatch_error[i].first.line].substr(str_at + 2 +\
 				mismatch_error[i].first.tag_name.size()));
 			//get all lines in the middle
@@ -802,17 +852,6 @@ bool solve_errors()
 
 	writeFile();
 
-	//TODO: 7ot kol dah f do while loop
-	//3l4an lw format error yb2a call a3ml format w arg3 loop tany
-	bool x=false;
-
-	missing_opening.clear();
-	missing_opening.shrink_to_fit();
-	stack<xml_tag> tags;
-	ifstream file(input_file_path);
-
-	string_file.clear();
-	parse_missingOpen(tags, file, x,true);
 	if (missing_opening.size())
 		solve_missingOpen();
 
