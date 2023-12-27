@@ -6,12 +6,8 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
-using namespace std;
+#include "prettify.h"
+
 
 
 // Function to remove leading whitespaces (including tabs) from a string
