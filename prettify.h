@@ -17,8 +17,8 @@ using namespace std;
 
 
 string removeLeadingTabs(const string& line) ;
-void separateTags(const string& inputFileName, const string& outputFileName);
-void prettifyXML(const string& inputFileName, const string& outputFileName);
+void separateTags(const string& inputFileName);
+void prettifyXML(const string& inputFileName);
 
 
 
