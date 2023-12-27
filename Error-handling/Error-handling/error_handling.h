@@ -19,7 +19,7 @@ enum class ERROR_MAIN_TYPE :uint8_t
 };
 enum class TAG_TYPE :uint8_t
 {
-	OPENING_TAG, CLOSING_TAG, M_OPEN_BRACKET, M_CLOSE_BRACKET
+	OPENING_TAG, CLOSING_TAG, M_OPEN_BRACKET, M_CLOSE_BRACKET,NULL_TAG
 };
 
 class xml_error
@@ -45,22 +45,21 @@ public:
 	string tag_name;
 	TAG_TYPE type;
 	int line;
-	bool found;
-	xml_tag(const string& tag_name, const TAG_TYPE& type, int line, bool found)
-		: tag_name(tag_name), type(type), line(line), found(found)
+	xml_tag(const string& tag_name, const TAG_TYPE& type, int line)
+		: tag_name(tag_name), type(type), line(line)
 	{
 	}
 	xml_tag() = default;
 };
 
 extern vector<xml_error> error_list;
-extern vector<pair<xml_tag, xml_tag>> missing_opening;
-extern vector<pair<xml_tag, xml_tag>> missing_closing;
+extern vector<xml_tag> missing_opening;
+extern vector<xml_tag> missing_closing;
 extern vector<pair<xml_tag, xml_tag>> mismatch_error;
 extern vector<xml_tag> missing_bracket;
 
 //this flag(return value) means that the errors are found but cant be corrected as the file formatting is hard to correct
-uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
+bool find_errors(string file_path, int check_flag);
 
 /****************************************************************************************************************************
 *                                                   error correction

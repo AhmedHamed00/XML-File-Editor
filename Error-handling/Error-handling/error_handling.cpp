@@ -8,8 +8,8 @@ vector<string> string_file;
 
 //vectors to hold each type of solvable error
 vector<pair<xml_tag, xml_tag>> mismatch_error;
-vector<pair<xml_tag, xml_tag>> missing_opening;
-vector<pair<xml_tag, xml_tag>> missing_closing;
+vector<xml_tag> missing_opening;
+vector<xml_tag> missing_closing;
 vector<xml_tag> missing_bracket;
 vector<pair<xml_tag, string>> misspelled_tags;
 
@@ -127,9 +127,9 @@ static bool find_bracket_error(string path)
 			string err = "Missing Tag bracket : " + x;
 			error_list.push_back(xml_error(ERROR_TYPE::M_BRACKET, ERROR_MAIN_TYPE::SYNTAX, true, line,err));
 			if(x[0]=='<')
-				missing_bracket.push_back(xml_tag(x,TAG_TYPE::M_CLOSE_BRACKET,line,true));
+				missing_bracket.push_back(xml_tag(x,TAG_TYPE::M_CLOSE_BRACKET,line));
 			else
-				missing_bracket.push_back(xml_tag(x, TAG_TYPE::M_OPEN_BRACKET, line, true));
+				missing_bracket.push_back(xml_tag(x, TAG_TYPE::M_OPEN_BRACKET, line));
 		}
 		line++;
 	}
@@ -162,19 +162,6 @@ static bool is_inTagList(string tag_name)
 	return false;
 }
 
-//this functions removes a missing opening error and a missing closing error at specific indexes at creates a mismatch error
-static void create_mismatchError(int missing_opening_index, int missing_closing_index)
-{
-	pair<xml_tag, xml_tag> tag_pair;
-	tag_pair.first = missing_closing[missing_closing_index].first;
-	tag_pair.second = missing_opening[missing_opening_index].second;
-	mismatch_error.push_back(tag_pair);
-	string err = "Tags <" + tag_pair.first.tag_name + "> and </" + tag_pair.second.tag_name + "> mismatch";
-	error_list.push_back(xml_error(ERROR_TYPE::MISMATCH_TAG, ERROR_MAIN_TYPE::LOGICAL, true,tag_pair.first.line, err));
-	missing_closing.erase(missing_closing.begin() + missing_closing_index);
-	missing_opening.erase(missing_opening.begin() + missing_opening_index);
-}
-
 //this function clears all global variables for checking for new erros
 static void clear_vectorsData()
 {
@@ -196,242 +183,7 @@ static void clear_vectorsData()
 	string_file.shrink_to_fit();
 }
 
-//this function creates erros based on the remaning elements in the missing opening and closing tags vectors
-static void create_error()
-{
-	for (int i = 0; i < missing_closing.size(); i++)
-	{
-		string err = "Tag : <" + missing_closing[i].first.tag_name + "> was not closed";
-		error_list.push_back(xml_error(ERROR_TYPE::M_CLOSE, ERROR_MAIN_TYPE::SYNTAX, true, missing_closing[i].first.line, err));
-	}
-	for (int i = 0; i < missing_opening.size(); i++)
-	{
-		string err = "Tag : </" + missing_opening[i].second.tag_name + "> was not opened";
-		error_list.push_back(xml_error(ERROR_TYPE::M_OPEN, ERROR_MAIN_TYPE::SYNTAX, true, missing_opening[i].second.line, err));
-	}
-}
-
-//this fucntion finds every missing opening tag and missing closing tag in the same excat lines and creates a mismatch error 
-static void parse_misMatches()
-{
-	//find mismatches
-	//a mismatch is when the same tag is a missing open and another tag is missing close and both are in the same line
-	for (int i = 0; i < missing_opening.size(); i++)
-	{
-		int l = 0, r = missing_closing.size() - 1;
-		int j = -1;
-		int m = ceil(l + static_cast<float>(r - l) / 2);
-		while (l <= r)
-		{
-			m = ceil(l + static_cast<float>(r - l) / 2);
-			if (missing_closing[m].first.line == missing_opening[i].first.line)
-			{
-				if (missing_closing[m].second.line == missing_opening[i].second.line)
-				{
-					j = m;
-					break;
-				}
-				else if (missing_closing[m].second.line < missing_opening[i].second.line)
-					m++;
-				else if (missing_closing[m].second.line < missing_opening[i].second.line)
-					m--;
-				if (m > r || m < l)
-					break;
-			}
-			if (missing_closing[m].first.line < missing_opening[i].first.line)
-				l = m + 1;
-			else
-				r = m - 1;
-		}
-		if (j != -1)
-		{
-			create_mismatchError(i, j);
-			i--;
-		}
-	}
-}
-
-//this function loops on the stack and missing opening vector to get all missing closing tags
-static void parse_missingClose(stack<xml_tag>& tags)
-{
-	stack<int> missing_closing_line_tracker;
-	pair<xml_tag, xml_tag> tag_pair;
-	//find missing closing
-	while (!tags.empty())
-	{
-		//if no errors was found
-		if (missing_opening.empty())
-		{
-			//add error to mising closing 
-			tag_pair.first = tags.top();
-			if(missing_closing_line_tracker.empty())
-				tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, tags.top().line, false);
-			else
-			{
-				tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, missing_closing_line_tracker.top(), false);
-				missing_closing_line_tracker.pop();
-			}
-			missing_closing.push_back(tag_pair);
-			tags.pop();
-		}
-		//look for a missing opening tag with the same line as the top of the stack
-		for (int i = 0; i < missing_opening.size(); i++)
-		{
-			//if found it is a missing closing tag
-			if (missing_opening[i].first.line >= tags.top().line)
-			{
-				if (missing_opening[i].first.line > tags.top().line && missing_opening[i].first.tag_name == \
-					tags.top().tag_name)
-				{
-					tags.pop();
-					missing_opening.erase(missing_opening.begin() + i);
-					break;
-				}
-				else
-				{
-					//add error to mising closing and remove it from missing opening 
-					tag_pair.first = tags.top();
-					if (missing_closing_line_tracker.empty())
-					{
-						if (missing_opening[i].first.line > tags.top().line)
-							tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, \
-								missing_opening[i].first.line, false);
-						else
-							tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, \
-								missing_opening[i].second.line, false);
-					}
-					else
-					{
-						tag_pair.second = xml_tag(tags.top().tag_name, TAG_TYPE::CLOSING_TAG, \
-							missing_closing_line_tracker.top()-1, false);
-						//missing_closing_line_tracker.pop();
-					}
-					missing_closing.push_back(tag_pair);
-					tags.pop();
-				}
-				if (!missing_closing_line_tracker.empty())missing_closing_line_tracker.pop();
-				//try to pop the stack
-				if (tags.empty())break;
-				int line_break = missing_opening[i].first.line;
-				bool break_flag = true;
-				if (i + 1 < missing_opening.size())
-				{
-					if (missing_opening[i].first.tag_name != tags.top().tag_name && \
-						missing_opening[i].first.line < missing_opening[i + 1].first.line)
-						break_flag = false;
-				}
-				for (int j = i; j < missing_opening.size(); j++)
-				{
-					if (break_flag && missing_opening[j].first.line > line_break)break;
-					if (tags.top().tag_name == missing_opening[j].first.tag_name)
-					{//before we pop we need to know if the tag is presend multible times in the vector 
-						//if it is the last occurance should be poped with the top of the stack but both sould be in the same line error
-						bool repeated = false;
-						for (int o = missing_opening.size() - 1; o > j; o--)
-						{
-							if (missing_opening[o].first.line > missing_opening[i].first.line)continue;
-							if (missing_opening[o].first.tag_name == missing_opening[j].first.tag_name)
-							{//we found the last one so we pop it 
-								repeated = true;
-								missing_closing_line_tracker.push(tags.top().line);
-								tags.pop();
-								missing_opening.erase(missing_opening.begin() + o);
-								j--;
-								break;
-							}
-						}
-						if (!repeated)
-						{
-							missing_closing_line_tracker.push(tags.top().line-1);
-							tags.pop();
-							missing_opening.erase(missing_opening.begin() + j);
-							j--;
-						}
-						if (tags.empty())break;
-					}
-				}
-				break;
-			}
-			if (tags.empty())break;
-		}
-	}
-}
-
-//this function finds all missing open tags
-static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTagLine_ERR,bool only_missing_open)
-{
-	int line = 0;
-	vector<string> string_tags;
-	pair<xml_tag, xml_tag> tag_pair;
-	stack<int> missing_opening_line_tracker;
-	missing_opening_line_tracker.push(-1);
-	xml_tag current_tag;
-	while (file)
-	{
-		getline(file, search_text);
-		string_tags = get_tags(search_text);
-		string_file.push_back(search_text);
-		if (string_tags.size() > 2)multiTagLine_ERR = true;
-		if (string_tags.size() == 2)
-		{
-			//TODO:if there are 2 tags but they are not the same
-		}
-		for (string string_tag : string_tags)
-		{
-			//get tag type and create a tag object
-			if (string_tag[1] == '/')
-				current_tag = xml_tag(string_tag.substr(2, string_tag.size() - 3), TAG_TYPE::CLOSING_TAG, line, true);
-			else
-				current_tag = xml_tag(string_tag.substr(1, string_tag.length() - 2), TAG_TYPE::OPENING_TAG, line, true);
-
-			//check if tag is in the tag list
-			if (!is_inTagList(current_tag.tag_name))
-			{
-				if (!spelling_error_check(current_tag))
-				{
-					string err = "Tag : \"" + current_tag.tag_name + "\" is not in the tag list";
-					error_list.push_back(xml_error(ERROR_TYPE::UNKNOWN_TAG, ERROR_MAIN_TYPE::LOGICAL, false, line, err));
-				}
-			}
-
-			//check if it is a closing tag or openning tag
-			if (current_tag.type == TAG_TYPE::OPENING_TAG)
-			{
-				tags.push(current_tag);
-				missing_opening_line_tracker.push(current_tag.line);
-			}
-			else
-			{
-				//if the same tag is on top of the stack just pop the tag
-				if (!tags.empty() && tags.top().tag_name == current_tag.tag_name)
-				{
-					missing_opening_line_tracker.pop();
-					missing_opening_line_tracker.pop();
-					int o_line = tags.top().line;
-					missing_opening_line_tracker.push(o_line);
-					tags.pop();
-				}
-				else
-				{
-					if (tags.empty())
-						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, 0, false);
-					else if(only_missing_open==false)
-						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false);
-					else if (only_missing_open == true)
-					{
-						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, \
-							missing_opening_line_tracker.top(), false);
-						missing_opening_line_tracker.pop();
-					}
-					tag_pair.second = current_tag;
-					missing_opening.push_back(tag_pair);
-				}
-			}
-		}
-		line++;
-	}
-}
-
+//this function makes sure that the alst line is empty
 static void ensure_newLine(string file_path)
 {
 	fstream file(file_path);
@@ -442,50 +194,162 @@ static void ensure_newLine(string file_path)
 		file << endl;
 	file.close();
 }
-//this is the main error detection funciton
-uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
+
+static void parse_file(ifstream &file)
 {
-	bool multiTagLine_ERR = false;//this flag means that the errors are found but cant be corrected as the\
-	 file formatting is hard to correct
-	ensure_newLine(file_path);
+	//clear the string file
+	string_file.clear();
+	string_file.shrink_to_fit();
+	stack<xml_tag> tags;
+	pair<xml_tag, xml_tag> mismatch_tag_pair;
+	int line = 0;
+	while (file)
+	{
+		//read line
+		getline(file, search_text);
+		//add line to string file
+		string_file.push_back(search_text);
+		//get tags in line
+		vector<string> string_tags = get_tags(search_text);
+		xml_tag current_tag;
+		for (string tag : string_tags)
+		{
+			if (tag[1] == '/')//closing tag
+				current_tag = xml_tag(tag.substr(2, tag.size() - 3), TAG_TYPE::CLOSING_TAG, line);
+			else
+				current_tag = xml_tag(tag.substr(1, tag.size() - 2), TAG_TYPE::OPENING_TAG, line);
+
+			if (current_tag.type == TAG_TYPE::OPENING_TAG)
+				tags.push(current_tag);
+			else
+			{
+				if (tags.empty())
+				{
+					mismatch_tag_pair.second = current_tag;
+					mismatch_tag_pair.first = xml_tag("", TAG_TYPE::NULL_TAG, line);
+					mismatch_error.push_back(mismatch_tag_pair);
+				}
+				else
+				{
+					if (tags.top().tag_name == current_tag.tag_name)
+						tags.pop();
+					else
+					{
+						mismatch_tag_pair.first = tags.top();
+						mismatch_tag_pair.second = current_tag;
+						mismatch_error.push_back(mismatch_tag_pair);
+						tags.pop();
+					}
+				}
+			}
+		}
+		line++;
+	}
+	while (!tags.empty())
+	{
+		mismatch_tag_pair.first = tags.top();
+		mismatch_tag_pair.second = xml_tag("",TAG_TYPE::NULL_TAG,tags.top().line);
+		mismatch_error.push_back(mismatch_tag_pair);
+		tags.pop();
+	}
+}
+static void parse_misMatch()
+{
+	for (int i = 0; i < mismatch_error.size(); i++)
+	{
+		if (i + 1 < mismatch_error.size())
+		{
+			if (mismatch_error[i].first.tag_name == mismatch_error[i + 1].second.tag_name\
+				&& mismatch_error[i + 1].second.type!=TAG_TYPE::NULL_TAG)
+			{//they can be poped
+				mismatch_error[i].first.type = TAG_TYPE::NULL_TAG;
+				mismatch_error[i + 1].second.type = TAG_TYPE::NULL_TAG;
+			}
+		}
+		for (int j = i+1; j < mismatch_error.size(); j++)
+		{
+			//if its a null tag skip it
+			if (mismatch_error[j].first.tag_name == "")continue;
+			//if both tags are the same and line is less pop them
+			if (mismatch_error[i].second.tag_name == mismatch_error[j].first.tag_name\
+				&& mismatch_error[i].first.line >= mismatch_error[j].first.line)
+			{//they can be poped
+				mismatch_error[i].second.type = TAG_TYPE::NULL_TAG;
+				mismatch_error[j].first.type = TAG_TYPE::NULL_TAG;
+			}
+			//if the line is less 
+			else if (mismatch_error[i].first.line >= mismatch_error[j].first.line) continue;
+			break;
+		}
+	}
+}
+static void parse_errors()
+{
+	for(int i=0;i<mismatch_error.size();i++)
+	{ 
+		if (mismatch_error[i].first.type == TAG_TYPE::NULL_TAG && mismatch_error[i].second.type == TAG_TYPE::NULL_TAG)
+		{//if both tags are null remove it
+			mismatch_error.erase(mismatch_error.begin() + i);
+			i--;
+		}
+		else if (mismatch_error[i].first.type == TAG_TYPE::NULL_TAG)
+		{//missing opening tag
+			string err = "Tag \'</" + mismatch_error[i].second.tag_name + ">\' was not opened";
+			error_list.push_back(xml_error(ERROR_TYPE::M_OPEN, ERROR_MAIN_TYPE::SYNTAX, true, mismatch_error[i].second.line, err));
+			missing_opening.push_back(mismatch_error[i].second);
+			mismatch_error.erase(mismatch_error.begin() + i);
+			i--;
+		}
+		else if (mismatch_error[i].second.type == TAG_TYPE::NULL_TAG)
+		{
+			string err = "Tag \'<" + mismatch_error[i].first.tag_name + ">\' was not closed";
+			error_list.push_back(xml_error(ERROR_TYPE::M_CLOSE, ERROR_MAIN_TYPE::SYNTAX, true, mismatch_error[i].first.line, err));
+			missing_closing.push_back(mismatch_error[i].first);
+			mismatch_error.erase(mismatch_error.begin() + i);
+			i--;
+		}
+		else
+		{
+			string err = " & Line : "+to_string(mismatch_error[i].second.line)+" Tags \'<" + \
+				mismatch_error[i].first.tag_name + "\' and \'" +mismatch_error[i].second.tag_name + "\' doesnt match" ;
+			error_list.push_back(xml_error(ERROR_TYPE::MISMATCH_TAG, ERROR_MAIN_TYPE::SYNTAX, true, mismatch_error[i].first.line, err));
+		}
+	}
+}
+//this is the main error detection funciton
+bool find_errors(string file_path, int check_flag)
+{
+	//clear all data
 	clear_vectorsData();
+	//make sure the file ends in a new line
+	ensure_newLine(file_path);
+	//set global path
 	input_file_path = file_path;
+	//if the user want to check for mssing brackets do it
 	if (check_flag)
 	{
 		if (find_bracket_error(file_path))
 		{
-			success = 0;
-			return multiTagLine_ERR;
+			return false;
 		}
 	}
-	string_file.clear();
-	string_file.shrink_to_fit();
+	//open the file
 	ifstream file(file_path);
+	//check if the file is open
 	if (!file.is_open())
 	{
 		string err = "Problem openning file: " + file_path;
 		error_list.push_back(xml_error(ERROR_TYPE::FILE_NOT_OPEN, ERROR_MAIN_TYPE::LOGICAL, false, 0, err));
-		success = 0;
 		file.close();
-		return multiTagLine_ERR;
+		return false;
 	}
-
-	stack<xml_tag> tags;
-	//find mising opening
-	parse_missingOpen(tags, file, multiTagLine_ERR,true);
-	//find missing closing
-	parse_missingClose(tags);
-	//sort the arrays to use binary search
-	sort(missing_opening.begin(), missing_opening.end());
-	sort(missing_closing.begin(), missing_closing.end());
-	//find mismatches
-	parse_misMatches();
-	//create errors with messages to be displayed
-	create_error();
-	success = 1;
+	//parse the file and get mismatches
+	parse_file(file);
+	parse_misMatch();
+	parse_errors();
+	//close the file and return success 
 	file.close();
-	sort(error_list.begin(), error_list.end());
-	return multiTagLine_ERR;
+	return 1;
 }
 
 //operator overloading for printing the errors
@@ -758,24 +622,11 @@ static void solve_missingBracket()
 }
 static  void solve_missingClose()
 {
-	for (int i = 0; i < missing_closing.size(); i++)
-	{
-		string closing_tag = "</" + missing_closing[i].second.tag_name + ">\n";
-		int insert_at = string_file[missing_closing[i].second.line].find_first_not_of(" \t");
-		if (insert_at == -1)insert_at = 0;
-		string_file[missing_closing[i].second.line].insert(insert_at, closing_tag);
-	}
+	
 }
 static void solve_missingOpen()
 {
-	for (int i = 0; i < missing_opening.size(); i++)
-	{
-		string opening_tag = "<" + missing_opening[i].second.tag_name + ">\n";
-		if(missing_opening[i].first.line==-1)
-			string_file[0].insert(0,"\n" + opening_tag);
-		else
-			string_file[missing_opening[i].first.line].append("\n"+opening_tag);
-	}
+	
 }
 static bool solve_mismatch()
 {
