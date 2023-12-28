@@ -9,7 +9,7 @@
 using namespace std;
 int main()
 {
-   cout<< Compress_Using_Hoffman_Coding("sample.xml");
+   cout<< Compress_Using_Hoffman_Coding("sample.xml", "Hoffman_Tree.txt", "Hoffman_Coded_Output.txt");
    vector<char> copy ;
     Decompress_Hoffman_Coding( "oyt", "Hoffman_Tree.txt","Hoffman_Coded_Output.txt");
     for ( int i = 0; i < copy.size(); i++)
