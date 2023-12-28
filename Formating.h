@@ -21,8 +21,8 @@ typedef struct tree {
 
 void _Minify(vector<char>& input);
 void Save_Hoffman_Tree_data(vector<char>& input_tree, vector<char>& input_data, string hoffman_tree_file, string hoffman_coded_fle);
-void Compress_Using_Hoffman_Coding(string input_name);
-void Decompress_Hoffman_Coding(vector<char>& output, string tree_file_name, string coded_text);
+long long Compress_Using_Hoffman_Coding(string input_name);
+void Decompress_Hoffman_Coding(string outt, string tree_file_name, string coded_text);
 
 
 #endif /* Formating */

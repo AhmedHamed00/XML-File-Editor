@@ -48,7 +48,7 @@ bool compareBycount(node* a,node* b)
  * Inputs:
  *		  input: the name of the file including bath
  */
-void Compress_Using_Hoffman_Coding(string input_name)
+long long Compress_Using_Hoffman_Coding(string input_name)
 {
 	ifstream test;
 	test.open(input_name, std::ios_base::in | std::ios::binary);
@@ -185,7 +185,7 @@ void Compress_Using_Hoffman_Coding(string input_name)
 	{
 		free(letters_nodes_copy[i]);
 	}
-	
+	return saved_tree.size() + output.size();
 }
 /*
  * Description :
@@ -195,8 +195,9 @@ void Compress_Using_Hoffman_Coding(string input_name)
  *		  tree_file_name: the file incloding hoffman tree
  *		  coded_text: the text compressed by hoffman code
  */
-void Decompress_Hoffman_Coding( vector<char>& output,string tree_file_name,string coded_text)
+void Decompress_Hoffman_Coding( string outt,string tree_file_name,string coded_text)
 {
+	vector<char> output;
 	ifstream test;
 	test.open(coded_text, std::ios_base::in | std::ios::binary);
 	vector<char> input;
@@ -293,6 +294,13 @@ void Decompress_Hoffman_Coding( vector<char>& output,string tree_file_name,strin
 			i--;
 		}
 	}
+	ofstream test1;
+	test1.open(outt, std::ios_base::out | std::ios::binary);
+	for (int i = 0; i < output.size(); i++)
+	{
+		test1 << output[i];
+	}
+	test1.close();
 }
 /*
  * Description :
