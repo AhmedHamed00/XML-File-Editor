@@ -253,46 +253,33 @@ static void parse_file(ifstream &file)
 		tags.pop();
 	}
 }
-static bool remove_nulls()
-{
-	bool rem = false;
-	for (int i = 0; i < mismatch_error.size(); i++)
-	{
-		if (mismatch_error[i].first.type == TAG_TYPE::NULL_TAG && mismatch_error[i].second.type == TAG_TYPE::NULL_TAG)
-		{//if both tags are null remove it
-			mismatch_error.erase(mismatch_error.begin() + i);
-			i--;
-			rem = true;
-		}
-	}
-	return rem;
-}
 static void parse_misMatch()
 {
 	for (int i = 0; i < mismatch_error.size(); i++)
 	{
-		if ((i + 1 < mismatch_error.size())\
-			&& (mismatch_error[i].first.type != TAG_TYPE::NULL_TAG)\
-			&& mismatch_error[i + 1].second.type != TAG_TYPE::NULL_TAG)
+		if (i + 1 < mismatch_error.size())
 		{
-			if (mismatch_error[i].first.tag_name == mismatch_error[i + 1].second.tag_name)
-			{
+			if (mismatch_error[i].first.tag_name == mismatch_error[i + 1].second.tag_name\
+				&& mismatch_error[i + 1].second.type!=TAG_TYPE::NULL_TAG)
+			{//they can be poped
 				mismatch_error[i].first.type = TAG_TYPE::NULL_TAG;
-				mismatch_error[i+1].second.type = TAG_TYPE::NULL_TAG;
+				mismatch_error[i + 1].second.type = TAG_TYPE::NULL_TAG;
 			}
 		}
-		//reached the end of the vector
-		if (mismatch_error[i].second.type == TAG_TYPE::NULL_TAG)break;
 		for (int j = i+1; j < mismatch_error.size(); j++)
 		{
-			if (mismatch_error[j].first.line > mismatch_error[i].first.line)break;
-			if (mismatch_error[j].first.type == TAG_TYPE::NULL_TAG)continue;
-			if (mismatch_error[j].first.tag_name == mismatch_error[i].second.tag_name)
+			//if its a null tag skip it
+			if (mismatch_error[j].first.tag_name == "")continue;
+			//if both tags are the same and line is less pop them
+			if (mismatch_error[i].second.tag_name == mismatch_error[j].first.tag_name\
+				&& mismatch_error[i].first.line >= mismatch_error[j].first.line)
 			{//they can be poped
-				mismatch_error[j].first.type = TAG_TYPE::NULL_TAG;
 				mismatch_error[i].second.type = TAG_TYPE::NULL_TAG;
-				break;
+				mismatch_error[j].first.type = TAG_TYPE::NULL_TAG;
 			}
+			//if the line is less 
+			else if (mismatch_error[i].first.line >= mismatch_error[j].first.line) continue;
+			break;
 		}
 	}
 }
@@ -323,8 +310,8 @@ static void parse_errors()
 		}
 		else
 		{
-			string err = "and Line : "+to_string(mismatch_error[i].second.line)+" Tags \'<" + \
-				mismatch_error[i].first.tag_name + "\'> and \'</" +mismatch_error[i].second.tag_name + "\'> doesnt match" ;
+			string err = " & Line : "+to_string(mismatch_error[i].second.line)+" Tags \'<" + \
+				mismatch_error[i].first.tag_name + "\' and \'" +mismatch_error[i].second.tag_name + "\' doesnt match" ;
 			error_list.push_back(xml_error(ERROR_TYPE::MISMATCH_TAG, ERROR_MAIN_TYPE::SYNTAX, true, mismatch_error[i].first.line, err));
 		}
 	}
@@ -358,10 +345,7 @@ bool find_errors(string file_path, int check_flag)
 	}
 	//parse the file and get mismatches
 	parse_file(file);
-	do
-	{
-		parse_misMatch();
-	} while (remove_nulls());
+	parse_misMatch();
 	parse_errors();
 	//close the file and return success 
 	file.close();
@@ -403,6 +387,18 @@ ostream& operator << (ostream& out, const xml_error& c)
 }
 
 //comparision operators to enable the use of the built in sort funciton
+bool operator>(const xml_tag& a, const xml_tag& b)
+{
+	if (a.line > b.line)
+		return true;
+	return false;
+}
+bool operator<(const xml_tag& a, const xml_tag& b)
+{
+	if (a.line < b.line)
+		return true;
+	return false;
+}
 bool operator>(const xml_error& a, const xml_error& b)
 {
 	if (a.line > b.line)
@@ -422,15 +418,6 @@ bool operator<(const xml_error& a, const xml_error& b)
 /****************************************************************************************************************************
 *												   error correction
 *****************************************************************************************************************************/
-static int get_priority(string _tag_name)
-{
-	if (_tag_name == "id" || _tag_name == "name" || _tag_name == "body" || _tag_name == "topic")return 0;
-	if (_tag_name == "topics" || _tag_name == "follower")return 1;
-	if (_tag_name == "post" || _tag_name == "followers")return 2;
-	if (_tag_name == "posts")return 3;
-	if (_tag_name == "user")return 4;
-	if (_tag_name == "users")return 5;
-}
 static string vec_to_str(vector<string>& content)
 {
 	string res;
@@ -573,7 +560,7 @@ static void replace_closing(int i)
 static void replace_opening(int i)
 {
 	int insert_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
-	string_file[mismatch_error[i].first.line].replace(insert_at + 1, mismatch_error[i].first.tag_name.size(), \
+	string_file[misspelled_tags[i].first.line].replace(insert_at + 1, mismatch_error[i].first.tag_name.size(), \
 		mismatch_error[i].second.tag_name);
 }
 static void writeFile()
@@ -633,35 +620,9 @@ static void solve_missingBracket()
 		}
 	}
 }
-static void solve_missing_closing_prio_0(int index)
-{
-	int line = missing_closing[index].line;
-	vector<string> tags = {};
-	while (tags.size() == 0 && line < string_file.size())
-	{
-		tags = get_tags(string_file[line]);
-		line++;
-	}
-	if (line >= string_file.size())
-		string_file[string_file.size() - 1] += ("</" + missing_closing[index].tag_name + ">");
-	else
-	{
-		line--;
-		string_file[line].insert(string_file[line].find_first_of(tags[0]), "</" + missing_closing[index].tag_name + ">\n");
-	}
-}
 static  void solve_missingClose()
 {
-	sort(missing_closing.begin(), missing_closing.end());
-	for (int i = 0; i < missing_closing.size(); i++)
-	{
-		switch (get_priority(missing_closing[i].tag_name))
-		{
-		case 0:
-			solve_missing_closing_prio_0(i);
-			break;
-		}
-	}
+	
 }
 static void solve_missingOpen()
 {
@@ -732,31 +693,20 @@ bool solve_errors()
 	if (missing_bracket.size())
 		solve_missingBracket();
 
+	if (missing_closing.size())
+		solve_missingClose();
+
 	writeFile();
 
 	if (mismatch_error.size())
 		if (solve_mismatch() == false)return false;
 
 	writeFile();
-	if (missing_closing.size())
-		solve_missingClose();
 
 	if (missing_opening.size())
 		solve_missingOpen();
 
+	//TODO:check for empty tags
 	writeFile();
 	return true;
-}
-//comparision operators to enable the use of the built in sort funciton
-bool operator>(const xml_tag& a, const xml_tag& b)
-{
-	if (get_priority(a.tag_name) > get_priority(b.tag_name))
-		return true;
-	return false;
-}
-bool operator<(const xml_tag& a, const xml_tag& b)
-{
-	if (get_priority(a.tag_name) < get_priority(b.tag_name))
-		return true;
-	return false;
 }
