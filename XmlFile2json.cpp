@@ -31,37 +31,37 @@ bool check_equivalence(Node node1, Node node2) {
     }
 
 }
-// Function to trim leading and trailing whitespaces (spaces, tabs, and newlines) from a given string
+// Function to trim leading and trailing whitespaces (spaces, tabs, and newlines) from a given std::std::string
 
-string trim(const string& str) {
-    // Find the position of the first non-whitespace character in the string
+std::string trim(const std::string& str) {
+    // Find the position of the first non-whitespace character in the std::string
 
     size_t start = str.find_first_not_of(" \t\r\n");
-    // Find the position of the last non-whitespace character in the string
+    // Find the position of the last non-whitespace character in the std::string
 
     size_t end = str.find_last_not_of(" \t\r\n");
-    // Check if either the start or end position is not found, indicating an empty or all-whitespace string
+    // Check if either the start or end position is not found, indicating an empty or all-whitespace std::string
 
-    if (start == string::npos || end == string::npos) {
-        // Return an empty string if the input string is empty or contains only whitespaces
+    if (start == std::string::npos || end == std::string::npos) {
+        // Return an empty std::string if the input std::string is empty or contains only whitespaces
 
         return "";
     }
-    // Extract the substring between the first and last non-whitespace characters (inclusive)
+    // Extract the substd::string between the first and last non-whitespace characters (inclusive)
 
     return str.substr(start, end - start + 1);
 }
 // function for removing spaces
-void remove_spaces(string filename) {
-    string first_line = "";
-    string Second_line;
-    string buffer = "";
+void remove_spaces(std::string filename) {
+    std::string first_line = "";
+    std::string Second_line;
+    std::string buffer = "";
 
     // Open input file for reading
     ifstream file_without_spaces(filename);
 
     // Open output file for writing processed lines
-    ofstream outfile("sample3.txt");
+    ofstream outfile("Sample.txt");
 
     // Flag to track whether the current character between xml tag or not
     bool tag = false;
@@ -220,19 +220,19 @@ void writeTreeToJSONFile(ofstream& outfile, Node& node, int count = 0, bool equa
         }
     }
 }
-void  xmlFileToJson(string Path)
+void  xmlFileToJson(std::string Path,std::string json_file)
 {
     // Remove spaces from the input path
     remove_spaces(Path);
 
     // Open the file with the provided path
-    ifstream file("sample3.txt");
+    ifstream file("Sample.txt");
 
     // Stack to keep track of XML nodes
     stack<Node> node_stack;
 
     // Read the file line by line
-    string line;
+    std::string line;
     Node imaginary_firstnode;
     node_stack.push(imaginary_firstnode);
     int cnt_line_number = 0;
@@ -248,22 +248,22 @@ void  xmlFileToJson(string Path)
 
         cnt_line_number++;
 
-        if (line.find("<") != string::npos) {
+        if (line.find("<") != std::string::npos) {
             // Extract the tag from the line
-            string tag = line.substr(line.find("<") + 1, line.find(">") - line.find("<") - 1);
+            std::string tag = line.substr(line.find("<") + 1, line.find(">") - line.find("<") - 1);
 
             if (tag[0] == '/') {
                 // Closing tag encountered
 
                 // Ensure there is at least one node in the stack
                 if (node_stack.size() < 2) {
-                    return; // Error: mismatched closing tag
+                    //return; // Error: mismatched closing tag
                 }
 
                 // Get the child node and remove it from the stack
                 Node child = node_stack.top();
                 if (child.name != tag.substr(1)) {
-                    return; // Error: mismatched closing tag
+                   //return; // Error: mismatched closing tag
                 }
                 node_stack.pop();
 
@@ -298,12 +298,11 @@ void  xmlFileToJson(string Path)
 
     // Ensure that all opening tags have corresponding closing tags
     if (node_stack.size() > 1) {
-        return; // Error: mismatched opening tag(s)
+        //return; // Error: mismatched opening tag(s)
     }
 
     // Open the output file for writing JSON
-    // an example to test
-    ofstream outputfile("C:/Users/karim/OneDrive/Documents/XmltoJson/XmlFile2json/sample.json");
+    ofstream outputfile(json_file);
     //ofstream outputjson( path_json);
     outputfile << '{' << endl;
 
@@ -314,11 +313,10 @@ void  xmlFileToJson(string Path)
 
 }
 
-
 int main(void) {
 
     // to test this code
-    xmlFileToJson("C:/Users/karim/OneDrive/Documents/XmltoJson/XmlFile2json/Sample.xml");
+    xmlFileToJson("C:/Users/karim/OneDrive/Documents/XmltoJson/XmlFile2json/sample.xml", "C:/Users/karim/OneDrive/Desktop/final Project DS json File/XmlFiletojson/Sampl.json");
 
 
     return 0;
