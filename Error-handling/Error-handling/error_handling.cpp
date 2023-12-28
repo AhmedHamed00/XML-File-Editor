@@ -12,12 +12,27 @@ vector<pair<xml_tag, xml_tag>> missing_opening;
 vector<pair<xml_tag, xml_tag>> missing_closing;
 vector<xml_tag> missing_bracket;
 vector<pair<xml_tag, string>> misspelled_tags;
+vector<xml_underCorrection_tag> MC_tags;
+vector<xml_underCorrection_tag> MO_tags;
 
 //the variable holds the last parsed line in the file
 static string search_text;
 //the file path
 static string input_file_path;
 //known tag bool
+vector<string> topic_nest = { "topic" };
+vector<string> id_nest = { "id" };
+vector<string> name_nest = { "name" };
+vector<string> body_nest = { "body" };
+vector<string> topics_nest = { "topics","topic" };
+vector<string> follower_nest = { "follower","id" };
+vector<string> followers_nest = { "followers","follower","id" };
+vector<string> post_nest = { "post","topics","topic","body"};
+vector<string> posts_nest = { "posts","post","topics","topic","body" };
+vector<string> user_nest = { "user","id","name","followers","follower","id","posts","post","topics","topic","body" };
+vector<string> users_nest = { "users","user","id","name","followers","follower","id","posts","post","topics","topic","body" };
+vector<vector<string>> nesting_lists = { topic_nest,id_nest,name_nest,body_nest,topics_nest,follower_nest,\
+followers_nest,post_nest,posts_nest,user_nest,users_nest };
 vector<string> tag_list = { "users","user","id","name","posts","post","topics","topic","body","followers","follower" };
 
 /****************************************************************************************************************************
@@ -507,6 +522,29 @@ bool operator<(const xml_error& a, const xml_error& b)
 /****************************************************************************************************************************
 *												   error correction
 *****************************************************************************************************************************/
+bool operator>(const xml_underCorrection_tag& a, const xml_underCorrection_tag& b)
+{
+	return a.priority > b.priority;
+}
+bool operator<(const xml_underCorrection_tag& a, const xml_underCorrection_tag& b)
+{
+	return a.priority < b.priority;
+}
+void parse_missingError()
+{
+	MC_tags.clear();
+	MC_tags.shrink_to_fit();
+	MO_tags.clear();
+	MO_tags.shrink_to_fit();
+	for (int i = 0; i < missing_closing.size(); i++)
+		MC_tags.push_back(xml_underCorrection_tag(missing_closing[i].first.tag_name, TAG_TYPE::OPENING_TAG, \
+			missing_closing[i].first.line));
+	for (int i = 0; i < missing_opening.size(); i++)
+		MO_tags.push_back(xml_underCorrection_tag(missing_opening[i].second.tag_name, TAG_TYPE::CLOSING_TAG, \
+			missing_opening[i].second.line));
+	sort(MC_tags.begin(), MC_tags.end());
+	sort(MO_tags.begin(), MO_tags.end());
+}
 static string vec_to_str(vector<string>& content)
 {
 	string res;
@@ -535,13 +573,6 @@ static int check_tagContent(string& open,string& close,vector<string>& content)
 	int done_flag = 0;
 	//vectors to hold the nesting values
 	//TODO:use another header file for abstraction
-	vector<string> topics_nest = { "topics","topic" };
-	vector<string> follower_nest = { "follower","id" };
-	vector<string> followers_nest = { "followers","follower" };
-	vector<string> post_nest = { "post","topics","body" };
-	vector<string> posts_nest = { "posts","post" };
-	vector<string> user_nest = { "user","id","name","followers","posts" };
-	vector<string> users_nest = { "users","user" };
 	vector<vector<string>> nesting_lists = { topics_nest,follower_nest,followers_nest,post_nest,posts_nest,\
 		user_nest,users_nest };
 	if (content_tags.size())
@@ -649,7 +680,7 @@ static void replace_closing(int i)
 static void replace_opening(int i)
 {
 	int insert_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
-	string_file[misspelled_tags[i].first.line].replace(insert_at + 1, mismatch_error[i].first.tag_name.size(), \
+	string_file[mismatch_error[i].first.line].replace(insert_at + 1, mismatch_error[i].first.tag_name.size(), \
 		mismatch_error[i].second.tag_name);
 }
 static void writeFile()
@@ -709,22 +740,96 @@ static void solve_missingBracket()
 		}
 	}
 }
-static  void solve_missingClose()
+static bool is_inNesting_list(string parent, string child)
 {
-	for (int i = 0; i < missing_closing.size(); i++)
+	
+}
+static void solve_MC(int index)
+{
+	int line = MC_tags[index].line;
+	string rest_of_line = string_file[line].substr(string_file[line].find("<"+MC_tags[index].tag_name+">") + \
+		MC_tags[index].tag_name.size()+2);
+	line++;
+	vector<string> tags = get_tags(rest_of_line);
+	string in_before;
+	bool done_search = false;
+	while (line < string_file.size())
 	{
-		string closing_tag = "</" + missing_closing[i].second.tag_name + ">\n";
-		int insert_at = string_file[missing_closing[i].second.line].find_first_not_of(" \t");
-		string_file[missing_closing[i].second.line].insert(insert_at, closing_tag);
+		for (string tag : tags)
+		{
+			if (!is_inNesting_list(MC_tags[index].tag_name, tag))
+			{
+				done_search = true;
+				in_before = tag;
+				break;
+			}
+		}
+		if (done_search)break;
+		tags = get_tags(string_file[line]);
+		line++;
+	}
+	//if reached the end of the file append the closing tag at the end
+	if (line >= string_file.size())
+		string_file[string_file.size() - 1] += "</" + MC_tags[index].tag_name + ">";
+	//if not insert the closing tag and the begining and add a new line
+	else
+	{
+		line--;
+		int insert_at = string_file[line].find(in_before);
+		string_file[line].insert(insert_at , "</" + MC_tags[index].tag_name + ">\n");
 	}
 }
-static void solve_missingOpen()
+static void solve_MO(int index)
 {
-	for (int i = 0; i < missing_opening.size(); i++)
+	int line = MO_tags[index].line;
+	string rest_of_line = string_file[line].substr(0,string_file[line].find("</" + MO_tags[index].tag_name + ">"));
+	line--;
+	vector<string> tags = get_tags(rest_of_line);
+	bool done_search = false;
+	string in_after;
+	while (line >= 0)
 	{
-		string opening_tag = "<" + missing_opening[i].second.tag_name + ">\n";
-		int insert_at = string_file[missing_opening[i].first.line].find_first_not_of(" \t");
-		string_file[missing_opening[i].first.line].insert(insert_at, opening_tag);
+		for (int i = tags.size()-1;i>=0;i--)
+		{
+			string tag = tags[i];
+			if (!is_inNesting_list(MO_tags[index].tag_name, tag))
+			{
+				done_search = true;
+				in_after = tag;
+				break;
+			}
+		}
+		if (done_search)break;
+		tags = get_tags(string_file[line]);
+		line--;
+	}
+	if (line < 0)
+	{
+		string_file[0].insert(0, "<" + MO_tags[index].tag_name + ">");
+	}
+	else
+	{
+		line++;
+		int insert_at = string_file[line].find(in_after);
+		string_file[line].insert(insert_at + in_after.size(), "\n<" + MO_tags[index].tag_name + ">");
+	}
+}
+static void solve_misssing_MO_MC_Tag()
+{
+	parse_missingError();
+	int MC_i = 0, MO_i = 0;
+	for (int prio = 0; prio < 6; prio++)
+	{
+		for (; MC_i < MC_tags.size(); MC_i++)
+		{
+			if (MC_tags[MC_i].priority != prio)break;
+			solve_MC(MC_i);
+		}
+		for (; MO_i < MO_tags.size(); MO_i++)
+		{
+			if (MO_tags[MO_i].priority != prio)break;
+			solve_MO(MO_i);
+		}
 	}
 }
 static bool solve_mismatch()
@@ -754,7 +859,7 @@ static bool solve_mismatch()
 		else
 		{
 			//get the rest of the first line
-			int str_at = string_file[mismatch_error[i].first.line].find_last_of("<" + mismatch_error[i].first.tag_name + ">");
+			int str_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
 			content.push_back(string_file[mismatch_error[i].first.line].substr(str_at + 2 +\
 				mismatch_error[i].first.tag_name.size()));
 			//get all lines in the middle
@@ -786,37 +891,20 @@ static void solve_misspelling()
 }
 bool solve_errors()
 {
-	if (misspelled_tags.size())
-		solve_misspelling();
 
 	if (missing_bracket.size())
 		solve_missingBracket();
 
-	if (missing_closing.size())
-		solve_missingClose();
-
-	writeFile();
+	if (misspelled_tags.size())
+		solve_misspelling();
 
 	if (mismatch_error.size())
 		if (solve_mismatch() == false)return false;
 
 	writeFile();
 
-	//TODO: 7ot kol dah f do while loop
-	//3l4an lw format error yb2a call a3ml format w arg3 loop tany
-	bool x=false;
+	solve_misssing_MO_MC_Tag();
 
-	missing_opening.clear();
-	missing_opening.shrink_to_fit();
-	stack<xml_tag> tags;
-	ifstream file(input_file_path);
-
-	string_file.clear();
-	parse_missingOpen(tags, file, x,true);
-	if (missing_opening.size())
-		solve_missingOpen();
-
-	//TODO:check for empty tags
 	writeFile();
 	return true;
 }

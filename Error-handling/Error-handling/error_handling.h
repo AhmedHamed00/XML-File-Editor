@@ -52,6 +52,27 @@ public:
 	}
 	xml_tag() = default;
 };
+class xml_underCorrection_tag
+{
+public:
+	string tag_name;
+	TAG_TYPE type;
+	int line;
+	int priority;
+	
+
+	xml_underCorrection_tag(const string& tag_name, const TAG_TYPE& type, int line)
+		: tag_name(tag_name), type(type), line(line)
+	{
+		if (tag_name == "id" || tag_name == "body" || tag_name == "topic" \
+			|| tag_name == "name")this->priority = 0;
+		if (tag_name == "follower" || tag_name == "topics")this->priority = 1;
+		if (tag_name == "followers" || tag_name == "post")this->priority = 2;
+		if (tag_name == "posts")this->priority = 3;
+		if (tag_name == "user")this->priority = 4;
+		if (tag_name == "users")this->priority = 5;
+	}
+};
 
 extern vector<xml_error> error_list;
 extern vector<pair<xml_tag, xml_tag>> missing_opening;
