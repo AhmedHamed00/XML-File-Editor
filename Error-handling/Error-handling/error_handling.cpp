@@ -27,7 +27,7 @@ vector<string> body_nest = { "body" };
 vector<string> topics_nest = { "topics","topic" };
 vector<string> follower_nest = { "follower","id" };
 vector<string> followers_nest = { "followers","follower","id" };
-vector<string> post_nest = { "post","topics","topic","body"};
+vector<string> post_nest = { "post","topics","topic","body" };
 vector<string> posts_nest = { "posts","post","topics","topic","body" };
 vector<string> user_nest = { "user","id","name","followers","follower","id","posts","post","topics","topic","body" };
 vector<string> users_nest = { "users","user","id","name","followers","follower","id","posts","post","topics","topic","body" };
@@ -40,7 +40,7 @@ vector<string> tag_list = { "users","user","id","name","posts","post","topics","
 *****************************************************************************************************************************/
 
 //this function calculates the Levenshtein distance between two strings 
-static int lev_dist(string str1,string str2)
+static int lev_dist(string str1, string str2)
 {
 	int m = str1.length();
 	int n = str2.length();
@@ -53,19 +53,19 @@ static int lev_dist(string str1,string str2)
 	for (int j = 0; j <= n; j++)
 		levMat[0][j] = j;
 
-	for (int i = 1; i <= m; i++) 
+	for (int i = 1; i <= m; i++)
 	{
-		for (int j = 1; j <= n; j++) 
+		for (int j = 1; j <= n; j++)
 		{
 			//if the same characters no extra cost
-			if (str1[i - 1] == str2[j - 1]) 
+			if (str1[i - 1] == str2[j - 1])
 			{
 				levMat[i][j] = levMat[i - 1][j - 1];
 			}
 			//if they differ look in the adjacent cells and find the minimum value + 1 
-			else 
+			else
 			{
-				levMat[i][j] = 1+ min(levMat[i][j - 1],min(levMat[i - 1][j],levMat[i - 1][j - 1]));
+				levMat[i][j] = 1 + min(levMat[i][j - 1], min(levMat[i - 1][j], levMat[i - 1][j - 1]));
 			}
 		}
 	}
@@ -79,14 +79,14 @@ static bool spelling_error_check(xml_tag& tag)
 	string str = tag.tag_name;
 	//remove white spaces in tag
 	for (int i = 0; i < str.size(); i++)
-		if (str[i] == ' ' || str[i]=='\t')
+		if (str[i] == ' ' || str[i] == '\t')
 			str.erase(str.begin() + i);
 	//find the distance to all the known tags
 	vector<int> dist;
 	for (int i = 0; i < tag_list.size(); i++)
 		dist.push_back(lev_dist(str, tag_list[i]));
 	//find the min distance
-	int min = INT_MAX,min_i=dist.size();
+	int min = INT_MAX, min_i = dist.size();
 	for (int i = 0; i < dist.size(); i++)
 	{
 		if (dist[i] < min)
@@ -98,7 +98,7 @@ static bool spelling_error_check(xml_tag& tag)
 	//if the min distance is less than 3 it could be corrected
 	if (min <= 2)
 	{
-		string err = "Tag : \"" + tag.tag_name + "\" is unkown, did you mean \""+tag_list[min_i]+"\" ?";
+		string err = "Tag : \"" + tag.tag_name + "\" is unkown, did you mean \"" + tag_list[min_i] + "\" ?";
 		error_list.push_back(xml_error(ERROR_TYPE::UNKNOWN_TAG, ERROR_MAIN_TYPE::LOGICAL, true, tag.line, err));
 		pair<xml_tag, string> pair;
 		pair.first = tag;
@@ -137,12 +137,12 @@ static bool find_bracket_error(string path)
 			parsed = static_cast<string>(s.suffix());
 		}
 
-		for(string x:m)
+		for (string x : m)
 		{
 			string err = "Missing Tag bracket : " + x;
-			error_list.push_back(xml_error(ERROR_TYPE::M_BRACKET, ERROR_MAIN_TYPE::SYNTAX, true, line,err));
-			if(x[0]=='<')
-				missing_bracket.push_back(xml_tag(x,TAG_TYPE::M_CLOSE_BRACKET,line,true));
+			error_list.push_back(xml_error(ERROR_TYPE::M_BRACKET, ERROR_MAIN_TYPE::SYNTAX, true, line, err));
+			if (x[0] == '<')
+				missing_bracket.push_back(xml_tag(x, TAG_TYPE::M_CLOSE_BRACKET, line, true));
 			else
 				missing_bracket.push_back(xml_tag(x, TAG_TYPE::M_OPEN_BRACKET, line, true));
 		}
@@ -185,7 +185,7 @@ static void create_mismatchError(int missing_opening_index, int missing_closing_
 	tag_pair.second = missing_opening[missing_opening_index].second;
 	mismatch_error.push_back(tag_pair);
 	string err = "Tags <" + tag_pair.first.tag_name + "> and </" + tag_pair.second.tag_name + "> mismatch";
-	error_list.push_back(xml_error(ERROR_TYPE::MISMATCH_TAG, ERROR_MAIN_TYPE::LOGICAL, true,tag_pair.first.line, err));
+	error_list.push_back(xml_error(ERROR_TYPE::MISMATCH_TAG, ERROR_MAIN_TYPE::LOGICAL, true, tag_pair.first.line, err));
 	missing_closing.erase(missing_closing.begin() + missing_closing_index);
 	missing_opening.erase(missing_opening.begin() + missing_opening_index);
 }
@@ -331,13 +331,11 @@ static void parse_missingClose(stack<xml_tag>& tags)
 }
 
 //this function finds all missing open tags
-static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTagLine_ERR,bool only_missing_open)
+static void parse_missingOpen(stack<xml_tag>& tags, ifstream& file, bool& multiTagLine_ERR, bool spell_check)
 {
 	int line = 0;
 	vector<string> string_tags;
 	pair<xml_tag, xml_tag> tag_pair;
-	stack<int> missing_opening_line_tracker;
-	missing_opening_line_tracker.push(0);
 	xml_tag current_tag;
 	while (file)
 	{
@@ -356,7 +354,15 @@ static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTag
 			//check if tag is in the tag list
 			if (!is_inTagList(current_tag.tag_name))
 			{
-				if (!spelling_error_check(current_tag))
+				if (spell_check)
+				{
+					if (!spelling_error_check(current_tag))
+					{
+						string err = "Tag : \"" + current_tag.tag_name + "\" is not in the tag list";
+						error_list.push_back(xml_error(ERROR_TYPE::UNKNOWN_TAG, ERROR_MAIN_TYPE::LOGICAL, false, line, err));
+					}
+				}
+				else
 				{
 					string err = "Tag : \"" + current_tag.tag_name + "\" is not in the tag list";
 					error_list.push_back(xml_error(ERROR_TYPE::UNKNOWN_TAG, ERROR_MAIN_TYPE::LOGICAL, false, line, err));
@@ -367,30 +373,20 @@ static void parse_missingOpen(stack<xml_tag>& tags,ifstream& file,bool& multiTag
 			if (current_tag.type == TAG_TYPE::OPENING_TAG)
 			{
 				tags.push(current_tag);
-				missing_opening_line_tracker.push(current_tag.line);
 			}
 			else
 			{
 				//if the same tag is on top of the stack just pop the tag
 				if (!tags.empty() && tags.top().tag_name == current_tag.tag_name)
 				{
-					missing_opening_line_tracker.pop();
-					missing_opening_line_tracker.pop();
-					int o_line = tags.top().line;
-					if (current_tag.line == tags.top().line)
-						o_line++;
-					missing_opening_line_tracker.push(o_line);
 					tags.pop();
 				}
 				else
 				{
 					if (tags.empty())
 						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, 0, false);
-					else if(only_missing_open==false)
+					else
 						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, tags.top().line, false);
-					else if(only_missing_open==true)
-						tag_pair.first = xml_tag(current_tag.tag_name, TAG_TYPE::OPENING_TAG, \
-							missing_opening_line_tracker.top(), false);
 					tag_pair.second = current_tag;
 					missing_opening.push_back(tag_pair);
 				}
@@ -406,19 +402,19 @@ static void ensure_newLine(string file_path)
 	char s;
 	file.seekg(-1, ios_base::end);
 	s = file.get();
-	if(s!='\n')
+	if (s != '\n')
 		file << endl;
 	file.close();
 }
 //this is the main error detection funciton
-uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
+uint8_t find_errors(string file_path, uint8_t& success, bool bracket_flag, bool spell_flag)
 {
 	bool multiTagLine_ERR = false;//this flag means that the errors are found but cant be corrected as the\
-	 file formatting is hard to correct
+		 file formatting is hard to correct
 	ensure_newLine(file_path);
 	clear_vectorsData();
 	input_file_path = file_path;
-	if (check_flag)
+	if (bracket_flag)
 	{
 		if (find_bracket_error(file_path))
 		{
@@ -440,7 +436,7 @@ uint8_t find_errors(string file_path, uint8_t& success, int check_flag)
 
 	stack<xml_tag> tags;
 	//find mising opening
-	parse_missingOpen(tags, file, multiTagLine_ERR,false);
+	parse_missingOpen(tags, file, multiTagLine_ERR, spell_flag);
 	//find missing closing
 	parse_missingClose(tags);
 	//sort the arrays to use binary search
@@ -485,7 +481,7 @@ ostream& operator << (ostream& out, const ERROR_MAIN_TYPE& c)
 }
 ostream& operator << (ostream& out, const xml_error& c)
 {
-	out << "Line : " << c.line << "\t" << c.msg << endl <<'\t' << c.main_type << c.error_type \
+	out << "Line : " << c.line << "\t" << c.msg << endl << '\t' << c.main_type << c.error_type \
 		<< "\tSolvabilty : " << (c.solvable ? "can be solved" : "can't be solved");
 	return out;
 }
@@ -522,8 +518,6 @@ bool operator<(const xml_error& a, const xml_error& b)
 /****************************************************************************************************************************
 *												   error correction
 *****************************************************************************************************************************/
-
-
 bool operator>(const xml_underCorrection_tag& a, const xml_underCorrection_tag& b)
 {
 	return a.priority > b.priority;
@@ -567,7 +561,7 @@ static vector<string> get_tags_vec(vector<string>& str)
 	}
 	return res;
 }
-static int check_tagContent(string& open,string& close,vector<string>& content)
+static int check_tagContent(string& open, string& close, vector<string>& content)
 {//return 1 if the tag should be the opening tag,2 if it should be the closing tag,return 0 if needs more info
 	vector<string> content_tags = get_tags_vec(content);
 	int close_match = 0;
@@ -629,7 +623,7 @@ static int check_tagContent(string& open,string& close,vector<string>& content)
 		//when only text then the tag could be topic,name,id,body
 		// first look if one of the tags is a nested tag
 		bool found_open = false, found_close = false;
-		for (int i=0;i<nesting_lists.size();i++)
+		for (int i = 0; i < nesting_lists.size(); i++)
 		{
 			if (nesting_lists[i][0] == open)
 				found_open = true;
@@ -662,7 +656,7 @@ static int check_tagContent(string& open,string& close,vector<string>& content)
 		//its not id
 		//if any numbers its body
 		smatch s;
-		if(regex_search(string_content,s, regex("[\d,\.\?!]")))
+		if (regex_search(string_content, s, regex("[\d,\.\?!]")))
 		{//its body or error
 			if (open == "body")return 1;
 			else if (close == "body")return 2;
@@ -763,8 +757,8 @@ static bool is_inNesting_list(string parent, string child)
 static void solve_MC(int index)
 {
 	int line = MC_tags[index].line;
-	string rest_of_line = string_file[line].substr(string_file[line].find("<"+MC_tags[index].tag_name+">") + \
-		MC_tags[index].tag_name.size()+2);
+	string rest_of_line = string_file[line].substr(string_file[line].find("<" + MC_tags[index].tag_name + ">") + \
+		MC_tags[index].tag_name.size() + 2);
 	line++;
 	vector<string> tags = get_tags(rest_of_line);
 	string in_before;
@@ -792,20 +786,20 @@ static void solve_MC(int index)
 	{
 		line--;
 		int insert_at = string_file[line].find(in_before);
-		string_file[line].insert(insert_at , "</" + MC_tags[index].tag_name + ">\n");
+		string_file[line].insert(insert_at, "</" + MC_tags[index].tag_name + ">\n");
 	}
 }
 static void solve_MO(int index)
 {
 	int line = MO_tags[index].line;
-	string rest_of_line = string_file[line].substr(0,string_file[line].find("</" + MO_tags[index].tag_name + ">"));
+	string rest_of_line = string_file[line].substr(0, string_file[line].find("</" + MO_tags[index].tag_name + ">"));
 	line--;
 	vector<string> tags = get_tags(rest_of_line);
 	bool done_search = false;
 	string in_after;
 	while (line >= 0)
 	{
-		for (int i = tags.size()-1;i>=0;i--)
+		for (int i = tags.size() - 1; i >= 0; i--)
 		{
 			string tag = tags[i];
 			if (!is_inNesting_list(MO_tags[index].tag_name, tag))
@@ -876,7 +870,7 @@ static bool solve_mismatch()
 		{
 			//get the rest of the first line
 			int str_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
-			content.push_back(string_file[mismatch_error[i].first.line].substr(str_at + 2 +\
+			content.push_back(string_file[mismatch_error[i].first.line].substr(str_at + 2 + \
 				mismatch_error[i].first.tag_name.size()));
 			//get all lines in the middle
 			for (int o = mismatch_error[i].first.line + 1; o < mismatch_error[i].second.line; o++)

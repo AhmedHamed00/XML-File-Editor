@@ -31,8 +31,8 @@ public:
 	string msg;
 	int line;
 
-	xml_error(const ERROR_TYPE& error_type, const ERROR_MAIN_TYPE& main_type, bool solvable,int line,string msg )
-		: error_type(error_type), main_type(main_type), line(line), solvable(solvable),msg(msg)
+	xml_error(const ERROR_TYPE& error_type, const ERROR_MAIN_TYPE& main_type, bool solvable, int line, string msg)
+		: error_type(error_type), main_type(main_type), line(line), solvable(solvable), msg(msg)
 	{
 	}
 	friend ostream& operator << (ostream& out, const xml_error& c);
@@ -59,7 +59,7 @@ public:
 	TAG_TYPE type;
 	int line;
 	int priority;
-	
+
 
 	xml_underCorrection_tag(const string& tag_name, const TAG_TYPE& type, int line)
 		: tag_name(tag_name), type(type), line(line)
@@ -75,13 +75,9 @@ public:
 };
 
 extern vector<xml_error> error_list;
-extern vector<pair<xml_tag, xml_tag>> missing_opening;
-extern vector<pair<xml_tag, xml_tag>> missing_closing;
-extern vector<pair<xml_tag, xml_tag>> mismatch_error;
-extern vector<xml_tag> missing_bracket;
 
 //this flag(return value) means that the errors are found but cant be corrected as the file formatting is hard to correct
-uint8_t find_errors(string file_path, uint8_t& success, int check_flag);
+uint8_t find_errors(string file_path, uint8_t& success, bool bracket_flag, bool spell_flag);
 
 /****************************************************************************************************************************
 *                                                   error correction
