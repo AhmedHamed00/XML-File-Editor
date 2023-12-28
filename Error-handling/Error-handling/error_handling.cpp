@@ -901,6 +901,13 @@ static void solve_misspelling()
 }
 bool solve_errors()
 {
+	for (int i = 0; i < error_list.size(); i++)
+	{
+		if (error_list[i].solvable == false) {
+
+			return false;
+		}
+	}
 
 	if (missing_bracket.size())
 		solve_missingBracket();
@@ -910,8 +917,6 @@ bool solve_errors()
 
 	if (mismatch_error.size())
 		if (solve_mismatch() == false)return false;
-
-	writeFile();
 
 	solve_misssing_MO_MC_Tag();
 

@@ -1,2 +1,35 @@
 ﻿  Error-handling.cpp
+  error_handling.cpp
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(45,8): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(46,8): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(89,27): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(161,19): warning C4129: '/': unrecognized character escape sequence
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(236,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(238,9): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(241,12): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(305,18): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(413,1): warning C4010: single-line comment contains line-continuation character
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(556,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(643,19): warning C4129: 'd': unrecognized character escape sequence
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(659,45): warning C4129: 'd': unrecognized character escape sequence
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(659,45): warning C4129: '.': unrecognized character escape sequence
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(672,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(678,16): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(703,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(708,25): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(716,52): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(724,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(725,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(735,25): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(788,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(802,14): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(823,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(847,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(863,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(864,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(872,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(879,60): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(897,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
+C:\Users\George\source\repos\XML-File-Editor\Error-handling\Error-handling\error_handling.cpp(756): warning C4715: 'is_inNesting_list': not all control paths return a value
   Error-handling.vcxproj -> C:\Users\George\Source\Repos\XML-File-Editor\Error-handling\x64\Debug\Error-handling.exe
