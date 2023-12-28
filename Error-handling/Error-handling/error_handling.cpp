@@ -522,6 +522,8 @@ bool operator<(const xml_error& a, const xml_error& b)
 /****************************************************************************************************************************
 *												   error correction
 *****************************************************************************************************************************/
+
+
 bool operator>(const xml_underCorrection_tag& a, const xml_underCorrection_tag& b)
 {
 	return a.priority > b.priority;
@@ -742,7 +744,21 @@ static void solve_missingBracket()
 }
 static bool is_inNesting_list(string parent, string child)
 {
-	
+	if (child[1] == '/')
+		child = child.substr(2, child.size() - 3);
+	else
+		child = child.substr(1, child.size() - 2);
+	for (int i = 0; i < nesting_lists.size(); i++)
+	{
+		if (nesting_lists[i][0] == parent)
+		{//found a specific list
+			for (int j = 1; j < nesting_lists[i].size(); j++)
+			{
+				if (nesting_lists[i][j] == child)return true;
+			}
+			return false;
+		}
+	}
 }
 static void solve_MC(int index)
 {
