@@ -7,8 +7,16 @@
  * Inputs:
  *		  input-> the xml file read into a char vector
  */
-void _Minify(vector<char>& input)
+void _Minify(string input_name)
 {
+	ifstream test;
+	test.open(input_name, std::ios_base::in | std::ios::binary);
+	vector<char> input;
+	char ch;
+	while (test.get(ch)) {
+		input.push_back(ch);
+	}
+	test.close();
 	for (unsigned int i = 0; i < input.size(); i++)
 	{
 		if(i< (input.size()-5) && input[i] =='<' && input[i+1] == 'b' && input[i+2] == 'o' && input[i+3] == 'd' && input[i+4] == 'y')
@@ -29,6 +37,13 @@ void _Minify(vector<char>& input)
 			i--;
 		}
 	}
+	ofstream test2;
+	test2.open(input_name, std::ios_base::out | std::ios::binary);
+	for (int i = 0; i < input.size(); i++)
+	{
+		test2 << input[i];
+	}
+	test2.close();
 }
 /*
  * Description :
@@ -58,7 +73,6 @@ long long Compress_Using_Hoffman_Coding(string input_name,string Hoffman_Tree,st
 		input.push_back(ch);
 	}
 	test.close();
-	_Minify(input);
 	vector<char> output;
 	tree hoffman;
 	vector<node *> letters_nodes;
