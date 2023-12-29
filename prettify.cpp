@@ -1,9 +1,8 @@
 //============================================================================
-// Name        : DataStructureProjectPrettifyingTrial.cpp
+// Name        : Prettify.cpp
 // Author      : Noha Adel ~.~
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
+// Description : C file for a the prettify/formatting function, it's responsible for
+//               formatting an xml file so that the output has correct indentation levels 
 //============================================================================
 
 #include "prettify.h"
@@ -22,9 +21,9 @@ string removeLeadingTabs(const string& line) {
 }
 
 // Function to separate tags onto individual lines
-void separateTags(const string& inputFileName) {
+void separateTags(const string& inputFileName, const string& outputFileName) {
 	ifstream inputFile(inputFileName);
-	ofstream outputFile(inputFileName);
+	ofstream outputFile(outputFileName);
 
 	if (!inputFile.is_open() || !outputFile.is_open()) {
 		cerr << "Error opening files." << std::endl;
@@ -34,8 +33,6 @@ void separateTags(const string& inputFileName) {
 	string line;
 	string openingTag;
 	string data;
-	string new_file;
-
 	while (getline(inputFile, line)) {
 		// Remove leading tabs and whitespaces
 		string trimmedLine = removeLeadingTabs(line);
@@ -49,23 +46,18 @@ void separateTags(const string& inputFileName) {
 				if (openingBracketPos != string::npos && closingBracketPos != string::npos) {
 					// Separate opening and closing tags onto individual lines
 					openingTag = trimmedLine.substr(openingBracketPos, closingBracketPos - openingBracketPos + 1);
-					new_file += openingTag + "\n";
-					//outputFile << openingTag << endl;
+					outputFile << openingTag << endl;
 
 					pos = closingBracketPos + 1;
 				} else {
 					// No tags found, print the rest of the line
-					new_file +=  trimmedLine.substr(pos);
-					//outputFile << trimmedLine.substr(pos);
+					outputFile << trimmedLine.substr(pos);
 					break;
 				}
 			}
 			else{
-				// we can handle here the case where the data length is too short e.g. id and name
-					//that you can make it with its opening and closing tag in the same line bas msh adra walahy
 				data = trimmedLine.substr(pos, openingBracketPos-pos);
-				new_file += data + "\n";
-				//outputFile << data <<endl;
+				outputFile << data <<endl;
 				pos = openingBracketPos;
 
 			}
@@ -73,16 +65,15 @@ void separateTags(const string& inputFileName) {
 
 
 	}
-	outputFile << new_file;
 
 	inputFile.close();
 	outputFile.close();
 }
 
-void prettifyXML(const string& inputFileName) {
+void prettifyXML(const string& inputFileName, const string& outputFileName) {
 
 	ifstream inputFile(inputFileName);
-	ofstream outputFile(inputFileName);
+	ofstream outputFile(outputFileName);
 
 
 	//ofstream tempOutputFile("src/temp.xml");
@@ -90,11 +81,8 @@ void prettifyXML(const string& inputFileName) {
 		cerr << "Error opening files." << std::endl;
 		return;
 	}
-
 	string line;
 	string tag;
-	string new_line ="";
-
 	int indentationLevel = 0;
 
 	while (getline(inputFile, line))
@@ -104,44 +92,44 @@ void prettifyXML(const string& inputFileName) {
 		int closingStartTagPos = line.find("</");
 		int endTagPos2 = 0;
 
-		//el case bta3t start-data-end
+		//case of  opening tag-data-closing tag
 		if (startTagPos>=0 && endTagPos1 >=0 && closingStartTagPos!=0)
 		{
 			for (int i = 0; i < indentationLevel; i++) {
-				new_line+="    ";
+				outputFile << "    ";
 			}
 
-			//law la'et bedayet el close tag
+			//if a closing tag is found
 			if(closingStartTagPos >=0 ){
 				//indentationLevel--;
 				endTagPos2 = line.find('>' , endTagPos1+1); //hatly nehayetha el close tag fen
 				tag = line.substr(startTagPos,endTagPos2 - startTagPos + 1);  //extract el line b'a 3la b3do mn awel el start-data-close
 			}
-			//law el close tag msh mawgoda y3ny start bas aw start-data bas
+			//if closing tag doesn't exist, meaing opening tag only or opening tag-data
 			else{
 				indentationLevel++;
 				tag = line.substr(startTagPos, endTagPos1 - startTagPos + 1);
 			}
 
-			new_line+= tag + "\n";
+			outputFile << tag <<endl;
 
 		} else if(closingStartTagPos == 0 ){
 			indentationLevel--;
 			tag = line.substr(closingStartTagPos ,endTagPos1 +1);
 			for (int i = 0; i < indentationLevel; i++) {
-				new_line+="    ";
+				outputFile << "    ";
 			}
-			new_line+= tag + "\n";
+			outputFile << tag<<endl;
 
 			startTagPos = line.find('<' , endTagPos1+1);
 			if(startTagPos >0){
 				endTagPos2 = line.find('>' , startTagPos+1);
 				tag = line.substr(startTagPos , endTagPos2+1);
 				for (int i = 0; i < indentationLevel; i++) {
-					new_line+="    ";
+					outputFile << "    ";
 				}
 				indentationLevel++;
-				new_line+= tag + "\n";
+				outputFile << tag<<endl;
 			}
 		}
 		else
@@ -149,25 +137,25 @@ void prettifyXML(const string& inputFileName) {
 			// Non-tag content
 			for (int i = 0; i < indentationLevel; i++)
 			{
-				new_line+="    ";
+				outputFile << "    ";
 			}
-			new_line+= line + "\n";
+			outputFile << line<< endl;
 		}
 	}
-	outputFile << new_line;
 
-	//remove("src/temp.xml");
+	remove("src/temp.xml");
 	inputFile.close();
 	outputFile.close();
 
 }
 
+//that part was for testing, you can ignore 
 /*
 int main() {
 
-	separateTags("src/input.xml");
-	prettifyXML("src/input.xml");
+	separateTags("src/input.xml", "src/sep_output.xml");
+	prettifyXML("src/sep_output.xml", "src/output.xml");
 
 	return 0;
-}
-*/
+}*/
+
