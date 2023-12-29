@@ -1,7 +1,7 @@
 //============================================================================
 // Name        : Prettify.cpp
 // Author      : Noha Adel ~.~
-// Description : C file for a the prettify/formatting function, it's responsible for
+// Description : CPP file for a the prettify/formatting function, it's responsible for
 //               formatting an xml file so that the output has correct indentation levels 
 //============================================================================
 
