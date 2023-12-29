@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>XML_project</string>
+   <string>XML Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -78,20 +78,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="compress_button">
-          <property name="text">
-           <string>Compress</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="decompress_button">
-          <property name="text">
-           <string>Decompress</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QPushButton" name="jason_button">
           <property name="text">
            <string>Show Jason</string>
@@ -120,6 +106,8 @@
    </attribute>
    <addaction name="actionOpen_XML_file"/>
    <addaction name="actionSave_Text_as_XML_file"/>
+   <addaction name="actionCompress"/>
+   <addaction name="actionDecompress"/>
    <addaction name="actionClear"/>
    <addaction name="actionundo"/>
    <addaction name="actionRedo"/>
@@ -167,6 +155,30 @@
    </property>
    <property name="text">
     <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionCompress">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/compression.png</normaloff>:/images/compression.png</iconset>
+   </property>
+   <property name="text">
+    <string>Compress File</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionDecompress">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/zip.png</normaloff>:/images/zip.png</iconset>
+   </property>
+   <property name="text">
+    <string>Decompress File</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
