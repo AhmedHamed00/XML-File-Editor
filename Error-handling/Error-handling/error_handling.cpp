@@ -1,6 +1,11 @@
 #include "error_handling.h"
 using namespace std;
 
+//stacks for undo and redo
+stack <stack_storage> undo_stack;
+stack <stack_storage> redo_stack;
+
+
 //vector of errors this is used to display the errors
 vector<xml_error> error_list;
 //the file
@@ -19,7 +24,7 @@ vector<xml_underCorrection_tag> MO_tags;
 static string search_text;
 //the file path
 static string input_file_path;
-//known tag bool
+//known tag pool
 vector<string> topic_nest = { "topic" };
 vector<string> id_nest = { "id" };
 vector<string> name_nest = { "name" };
@@ -526,6 +531,21 @@ bool operator<(const xml_underCorrection_tag& a, const xml_underCorrection_tag& 
 {
 	return a.priority < b.priority;
 }
+
+static void read_file_into_vector()
+{
+	ensure_newLine(input_file_path);
+	ifstream file(input_file_path);
+	string file_line;
+	while (file)
+	{
+		getline(file, file_line);
+		string_file.push_back(file_line);
+	}
+	file.close();
+}
+
+
 void parse_missingError()
 {
 	MC_tags.clear();
@@ -754,7 +774,7 @@ static bool is_inNesting_list(string parent, string child)
 		}
 	}
 }
-static void solve_MC(int index)
+static void solve_MC(int index) //solve missing closing tag
 {
 	int line = MC_tags[index].line;
 	string rest_of_line = string_file[line].substr(string_file[line].find("<" + MC_tags[index].tag_name + ">") + \
@@ -789,7 +809,7 @@ static void solve_MC(int index)
 		string_file[line].insert(insert_at, "</" + MC_tags[index].tag_name + ">\n");
 	}
 }
-static void solve_MO(int index)
+static void solve_MO(int index) //solve missing open tag
 {
 	int line = MO_tags[index].line;
 	string rest_of_line = string_file[line].substr(0, string_file[line].find("</" + MO_tags[index].tag_name + ">"));
@@ -901,7 +921,9 @@ static void solve_misspelling()
 }
 bool solve_errors()
 {
-	for (int i = 0; i < error_list.size(); i++)
+
+
+	for (int i = 0; i < error_list.size(); i++)	//if there are unsolvable errors don't correct
 	{
 		if (error_list[i].solvable == false) {
 
@@ -909,6 +931,9 @@ bool solve_errors()
 		}
 	}
 
+	undo_stack.push(stack_storage(error_list, string_file, mismatch_error, missing_opening, \
+		missing_closing, missing_bracket, misspelled_tags));
+	
 	if (missing_bracket.size())
 		solve_missingBracket();
 
@@ -921,5 +946,51 @@ bool solve_errors()
 	solve_misssing_MO_MC_Tag();
 
 	writeFile();
+
+	clear_vectorsData();
+	read_file_into_vector();
+
 	return true;
+}
+
+
+void undo_error_correction() 
+{
+	if (!undo_stack.empty()) 
+	{
+		error_list = undo_stack.top().error_list_stack;
+		string_file = undo_stack.top().string_file_stack;
+		mismatch_error = undo_stack.top().mismatch_error_stack;
+		missing_opening = undo_stack.top().missing_opening_stack;
+		missing_closing = undo_stack.top().missing_closing_stack;
+		missing_bracket = undo_stack.top().missing_bracket_stack;
+		misspelled_tags = undo_stack.top().misspelled_tags_stack;
+		
+		redo_stack.push(undo_stack.top());
+		undo_stack.pop();
+	}
+}
+
+void redo_error_correction() 
+{
+	if (!redo_stack.empty()) {
+
+		error_list = redo_stack.top().error_list_stack;
+		string_file = redo_stack.top().string_file_stack;
+		mismatch_error = redo_stack.top().mismatch_error_stack;
+		missing_opening = redo_stack.top().missing_opening_stack;
+		missing_closing = redo_stack.top().missing_closing_stack;
+		missing_bracket = redo_stack.top().missing_bracket_stack;
+		misspelled_tags = redo_stack.top().misspelled_tags_stack;
+		
+		undo_stack.push(redo_stack.top());
+		redo_stack.pop();
+	}
+}
+
+void do_error_action() 
+{
+	undo_stack.push(stack_storage(error_list, string_file, mismatch_error, missing_opening, \
+		missing_closing, missing_bracket, misspelled_tags));
+	read_file_into_vector();
 }

@@ -74,6 +74,24 @@ public:
 	}
 };
 
+class stack_storage
+{
+public:
+	vector<xml_error> error_list_stack;
+	vector<string> string_file_stack;
+	vector<pair<xml_tag, xml_tag>> mismatch_error_stack;
+	vector<pair<xml_tag, xml_tag>> missing_opening_stack;
+	vector<pair<xml_tag, xml_tag>> missing_closing_stack;
+	vector<xml_tag> missing_bracket_stack;
+	vector<pair<xml_tag, string>> misspelled_tags_stack;
+
+	stack_storage(const vector<xml_error>& error_list_stack, const vector<string>& string_file_stack, const vector<pair<xml_tag, xml_tag>>& mismatch_error_stack, const vector<pair<xml_tag, xml_tag>>& missing_opening_stack, const vector<pair<xml_tag, xml_tag>>& missing_closing_stack, const vector<xml_tag>& missing_bracket_stack, const vector<pair<xml_tag, string>>& misspelled_tags_stack)
+		: error_list_stack(error_list_stack), string_file_stack(string_file_stack), mismatch_error_stack(mismatch_error_stack), missing_opening_stack(missing_opening_stack), missing_closing_stack(missing_closing_stack), missing_bracket_stack(missing_bracket_stack), misspelled_tags_stack(misspelled_tags_stack)
+	{
+	}
+};
+
+
 extern vector<xml_error> error_list;
 
 //this flag(return value) means that the errors are found but cant be corrected as the file formatting is hard to correct
@@ -84,3 +102,6 @@ uint8_t find_errors(string file_path, uint8_t& success, bool bracket_flag, bool 
 *****************************************************************************************************************************/
 
 bool solve_errors();
+void undo_error_correction();
+void redo_error_correction();
+void do_error_action();
