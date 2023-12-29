@@ -24,6 +24,27 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         images.qrc
+        json_window2.h json_window2.cpp json_window2.ui
+        XmlFile2Json.h
+        XmlFile2Json.cpp
+        prettify.h
+        prettify.cpp
+        Formatting.cpp
+        Formatting.h
+        decompressedfile.h decompressedfile.cpp decompressedfile.ui
+        graph_vis.h graph_vis.cpp graph_vis.ui
+        error_checking_window.h error_checking_window.cpp error_checking_window.ui
+        error_handling.cpp
+        error_handling.h
+        errors_list.h errors_list.cpp errors_list.ui
+
+
+
+
+
+
+
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET XML_project APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
