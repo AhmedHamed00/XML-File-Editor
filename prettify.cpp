@@ -158,3 +158,16 @@ void prettifyXML(const string& inputFileName, const string& outputFileName) {
 	outputFile.close();
 
 }
+
+
+//that part was for testing, you can ignore
+
+/*
+int main() {
+
+	separateTags("src/input.xml", "src/sep_output.xml");
+	prettifyXML("src/sep_output.xml", "src/output.xml");
+
+	return 0;
+}
+*/
