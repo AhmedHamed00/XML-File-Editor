@@ -11,14 +11,14 @@
 #include "prettify.h"
 #include "Formatting.h"
 #include "decompressedfile.h"
-#include "graph_vis.h"
 #include "error_checking_window.h"
 #include "error_handling.h"
 #include "errors_list.h"
-
+#include "xml_details.h"
+#include "network.h"
 typedef enum {
     error_checking,error_correction,
-    formatting,original,no_error_detected
+    formatting,original,no_error_detected,minifying,unsolvable_error
 } operation;
 
 std::stack <std::pair<QString,operation>> undo_stack; //redo and undo stacks takes pairs to define the current operation and the contents of file
@@ -27,15 +27,15 @@ std::stack <std::pair<QString,operation>> redo_stack;
 std::pair <QString,operation> undo_redo; //the pair that we will keep pushing or popping from the stack
 
 
-bool misspelled_tags_check=0;
+bool misspelled_tags_check=0; //flags set by checkboxes to be checked on
 bool missing_brackets_check=0;
 
 
 QString text; //text contained in XML file
 QString Json_text; //text contained in Json file
-QString Decompress_text;
+QString Decompress_text; //decompressed file contents
 QString xml_File; //path of xml file chosen by user
-QString error_list_text;
+QString error_list_text; //the text of the error list window
 std::string xml_file_String ;//path of xml file but in string not QString
 
 
@@ -53,9 +53,10 @@ XML_project::XML_project(QWidget *parent)
     ui->format_button->setEnabled(false);
     ui->jason_button->setEnabled(false);
     ui->details_button->setEnabled(false);
-    ui->graph_button->setEnabled(false);
     ui->actionundo->setEnabled(false);
     ui->actionRedo->setEnabled(false);
+    ui->Minify_button->setEnabled(false);
+    ui->actionSave_to_another_location->setEnabled(false);
 
 
 }
@@ -76,6 +77,7 @@ void XML_project::on_actionOpen_XML_file_triggered()
     ui->actionSave_Text_as_XML_file->setEnabled(false);
     ui->textEdit->setReadOnly(true);
     ui->error_check_button->setEnabled(true);
+     ui->actionSave_to_another_location->setEnabled(true);
     if(!file.open(QFile::ReadOnly | QFile::Text)) //if nothing is chosen by user display warning message
     {
         QMessageBox::warning(this,"Error","file not open");
@@ -104,6 +106,7 @@ void XML_project::on_actionSave_Text_as_XML_file_triggered()
     ui->actionOpen_XML_file->setEnabled(false);
     ui->textEdit->setReadOnly(true);
     ui->error_check_button->setEnabled(true);
+     ui->actionSave_to_another_location->setEnabled(true);
     if(!file.open(QFile::WriteOnly | QFile::Text)) //if no location chosen display warning message
     {
         QMessageBox::warning(this,"Error","No location was chosen");
@@ -131,6 +134,7 @@ void XML_project::on_actionClear_triggered() //reset entire app (can take a new 
     ui->textEdit->setTextColor(Qt::black); //reset the textEdit
     ui->actionSave_Text_as_XML_file->setEnabled(true); //enable entering new XML files
     ui->actionOpen_XML_file->setEnabled(true);
+    ui->actionSave_to_another_location->setEnabled(false);
     while(!undo_stack.empty()) //empty my stacks
     {
         undo_stack.pop();
@@ -151,7 +155,7 @@ void XML_project::on_actionClear_triggered() //reset entire app (can take a new 
 
     ui->jason_button->setEnabled(false);
     ui->details_button->setEnabled(false);
-    ui->graph_button->setEnabled(false);
+    ui->Minify_button->setEnabled(false);
 
 }
 
@@ -220,9 +224,9 @@ void XML_project::on_error_check_button_clicked()
         ui->error_correct_button->setEnabled(false);
         ui->actionundo->setEnabled(true);
         ui->jason_button->setEnabled(true);
-        ui->graph_button->setEnabled(true);
         ui->format_button->setEnabled(true);
         ui->details_button->setEnabled(true);
+        ui->Minify_button->setEnabled(true);
         undo_redo.first=text;
         undo_redo.second=no_error_detected;
         undo_stack.push(undo_redo);
@@ -266,10 +270,14 @@ void XML_project::on_error_correct_button_clicked()
     }
     ui->actionRedo->setEnabled(false);
     ui->actionundo->setEnabled(true);
-    if(!solve_errors())
+    bool error_correction_status=solve_errors();
+    if(error_correction_status==0)
     {
         QMessageBox::warning(this,"Error","Unsolvable Errors were Found please correct the file and try again");
         ui->error_correct_button->setEnabled(false);
+        undo_redo.first=text;
+        undo_redo.second=unsolvable_error;
+        undo_stack.push(undo_redo);
     }
     else
     {
@@ -278,11 +286,10 @@ void XML_project::on_error_correct_button_clicked()
         undo_redo.second=error_correction;
         undo_stack.push(undo_redo);
         ui->error_correct_button->setEnabled(false);
-        ui->textEdit->setPlainText(text);
         ui->jason_button->setEnabled(true);
-        ui->graph_button->setEnabled(true);
         ui->format_button->setEnabled(true);
         ui->details_button->setEnabled(true);
+        ui->Minify_button->setEnabled(true);
     }
 }
 
@@ -341,7 +348,8 @@ void XML_project::on_format_button_clicked()
     }
     ui->actionRedo->setEnabled(false);
     ui->actionundo->setEnabled(true);
-    ui->format_button->setEnabled(false);
+    ui->format_button->setEnabled(true);
+    ui->Minify_button->setEnabled(true);
     separateTags(xml_file_String, "prettify1.xml");
     prettifyXML("prettify1.xml", xml_file_String);
     write_on_textEdit_from_file();
@@ -349,72 +357,69 @@ void XML_project::on_format_button_clicked()
     undo_redo.second=formatting;
     undo_stack.push(undo_redo);
     do_error_action();
-    ui->textEdit->setPlainText(text);
 }
 
 
 
 
-void XML_project::on_graph_button_clicked()
-{
-    QString graph_details="digraph test{{1}{2,3,4}->{4}{3}->{2}{3}->{3}}";//to be commented
-    //an algorithm here should be written to iterate on graph
-    //first write digraph test{
-    //whenever you get a user check on the followers tab , if there are type {follower(id),follower2(id)}->{user(id)}
-    //if there are no followers just type {user id}
-    /*
-     * graph_details="diagraph test {"
-     * while(node!=null)
-     * {
-     *   if (node->followers_number !=0}
-     *   {
-     *
-     *      for(int i=0;i<followers_number;i++)
-     *      {
-     *          graph_details+="{"+ QString::number(node->follower[i]);
-     *          if(i!=followers_number-1)
-     *          {
-     *              graph_details += ","
-     *          }
-     *
-     *          else if( i==followers_number-1)
-     *          {
-     *              graph_details+="}->";
-     *          }
-     *      }
-     *
-     *   }
-     *   graph_details+="{" + QString::number(node->id) + "}";
-     *
-     *   node=node->next;
-     * }
-     * graph_details+="}";
-     */
-    QFile file("graph.dot");
+// void XML_project::on_graph_button_clicked()
+// {
+//     networking_analysis users_graph(xml_file_String);
+//     QString graph_details;
+//      graph_details="digraph test {";
+//      for(int i=0;i<users_graph.my_network.users.size();i++)
+//      {
+//        graph_details+="{" +QString::number(users_graph.my_network.users[i].id) + "}";
+//          if (users_graph.my_network.users[i].followers.size())
+//        {
+//           graph_details+="->";
+//           graph_details+="{";
+//           for(int j=0;j<users_graph.my_network.users[i].followers.size();j++)
+//           {
+//               graph_details+= QString::number(users_graph.my_network.users[i].followers[j]);
+//               if(j!=users_graph.my_network.users[i].followers.size()-1)
+//               {
+//                   graph_details += ",";
+//               }
 
-    if(!file.open(QFile::WriteOnly | QFile::Text))
-    {
+//               else if( j==users_graph.my_network.users[i].followers.size()-1)
+//               {
+//                   graph_details+="}";
+//               }
+//           }
+//        }
+//      }
+//      graph_details+="}";
 
-    }
-    else
-    {
-        QTextStream out(&file);
-        out << graph_details;
-        file.flush();
-        file.close();
-        system("dot -Tpng -O graph.dot");
-        Graph_vis new_graph;
-        new_graph.setModal(true);
-        new_graph.exec();
+//     QFile file("graph.dot");
 
+//     if(!file.open(QFile::WriteOnly | QFile::Text))
+//     {
 
-    }
-}
+//     }
+//     else
+//     {
+//         QTextStream out(&file);
+//         out << graph_details;
+//         file.flush();
+//         file.close();
+//         system("dot -Tpng -O graph.dot");
+//         Graph_vis new_graph;
+//         new_graph.setModal(true);
+//         new_graph.exec();
+
+//     }
+// }
 
 
 void XML_project::on_details_button_clicked()
 {
+    //pass xml to func of omar
+    //hnak b2a ya basha hat3mel set llview of the 2 lineedits in main , set them read only
 
+    xml_details network;
+    network.setModal(true);
+    network.exec();
 }
 
 
@@ -431,23 +436,32 @@ void XML_project::on_actionundo_triggered()
         ui->error_check_button->setEnabled(false);
         ui->error_correct_button->setEnabled(true);
         ui->format_button->setEnabled(false);
-        ui->graph_button->setEnabled(false);
         ui->details_button->setEnabled(false);
         ui->jason_button->setEnabled(false);
+        ui->Minify_button->setEnabled(false);
+    }
+    else if(undo_stack.top().second==unsolvable_error)
+    {
+        ui->error_correct_button->setEnabled(true);
     }
     else if(undo_stack.top().second==formatting)
     {
         ui->format_button->setEnabled(true);
+        ui->Minify_button->setEnabled(true);
     }
     else if(undo_stack.top().second==no_error_detected)
     {
         ui->error_check_button->setEnabled(true);
         ui->format_button->setEnabled(false);
-        ui->graph_button->setEnabled(false);
         ui->details_button->setEnabled(false);
         ui->jason_button->setEnabled(false);
+        ui->Minify_button->setEnabled(false);
     }
-
+    else if(undo_stack.top().second==minifying)
+    {
+        ui->Minify_button->setEnabled(true);
+        ui->format_button->setEnabled(true);
+    }
     redo_stack.push(undo_stack.top());
     undo_stack.pop();
     text=undo_stack.top().first;
@@ -486,25 +500,35 @@ void XML_project::on_actionRedo_triggered()
 
         ui->error_correct_button->setEnabled(false);
         ui->format_button->setEnabled(true);
-        ui->graph_button->setEnabled(true);
         ui->details_button->setEnabled(true);
         ui->jason_button->setEnabled(true);
+        ui->Minify_button->setEnabled(true);
+    }
+    else if(redo_stack.top().second==unsolvable_error)
+    {
+        ui->error_correct_button->setEnabled(false);
     }
 
 
     else if(redo_stack.top().second==formatting)
     {
-        ui->format_button->setEnabled(false);
+        ui->format_button->setEnabled(true);
+        ui->Minify_button->setEnabled(true);
     }
     else if(redo_stack.top().second==no_error_detected)
     {
         ui->error_check_button->setEnabled(false);
         ui->error_correct_button->setEnabled(false);
         ui->format_button->setEnabled(true);
-        ui->graph_button->setEnabled(true);
         ui->details_button->setEnabled(true);
         ui->jason_button->setEnabled(true);
+        ui->Minify_button->setEnabled(true);
 
+    }
+    else if(redo_stack.top().second==minifying)
+    {
+        ui->format_button->setEnabled(true);
+        ui->Minify_button->setEnabled(true);
     }
 
     undo_stack.push(redo_stack.top());
@@ -539,8 +563,8 @@ void XML_project::on_actionDecompress_triggered()
     std::string decompress_path_tree_coded_output_string;
 
 
-    QString filter= "XML File (*.xml)" ; //filter inputs to xml only
-    decompress_path =QFileDialog::getSaveFileName(this,"Choose Location to save Decompressed XML file",QDir::homePath(),filter);
+    QString filter= "XML File (*.xml) ;; JSON File (*.json)" ; //filter inputs to xml , jsononly
+    decompress_path =QFileDialog::getSaveFileName(this,"Choose Location to save Decompressed XML or JSON file",QDir::homePath(),filter);
     decompress_path_string= decompress_path.toStdString();
     QFile file(decompress_path);
     if(!file.open(QFile::WriteOnly | QFile::Text)) //if nothing is chosen by user display warning message
@@ -574,8 +598,6 @@ void XML_project::on_actionDecompress_triggered()
             {
                 file3.close();
                 Decompress_Hoffman_Coding(decompress_path_string,decompress_path_tree_string,decompress_path_tree_coded_output_string);
-                separateTags(decompress_path_string, "prettified_decompressed.xml");
-                prettifyXML("prettified_decompressed.xml", decompress_path_string);
                 QFile file4(decompress_path); //take text of json file to display it on TextEdit
 
                 if(!file4.open(QFile::ReadOnly | QFile::Text))
@@ -612,8 +634,8 @@ void XML_project::on_actionCompress_triggered()
     std::string compress_path_tree_coded_output_string;
 
 
-    QString filter= "XML File (*.xml)" ; //filter inputs to xml only
-    compress_path =QFileDialog::getOpenFileName(this,"Choose XML file to Compress",QDir::homePath(),filter);
+    QString filter= "XML File (*.xml);; JSON File (*.json)" ; //filter inputs to xml only
+    compress_path =QFileDialog::getOpenFileName(this,"Choose XML or JSON file to Compress",QDir::homePath(),filter);
     compress_path_string= compress_path.toStdString();
     QFile file(compress_path);
     if(!file.open(QFile::ReadOnly | QFile::Text)) //if nothing is chosen by user display warning message
@@ -658,6 +680,44 @@ void XML_project::on_actionCompress_triggered()
 
     }
 
+
+}
+
+
+void XML_project::on_Minify_button_clicked()
+{
+    while(!redo_stack.empty())
+    {
+        redo_stack.pop();
+    }
+    ui->Minify_button->setEnabled(true);
+    ui->format_button->setEnabled(true);
+    _Minify(xml_file_String);
+    write_on_textEdit_from_file();
+    undo_redo.first=text;
+    undo_redo.second=minifying;
+    undo_stack.push(undo_redo);
+    do_error_action();
+}
+
+
+void XML_project::on_actionSave_to_another_location_triggered()
+{
+    QString xml_File_new_location;
+    QString filter= "XML File (*.xml)" ;
+    xml_File_new_location =QFileDialog::getSaveFileName(this,"Save XML file",QDir::homePath(),filter); //chose where to save the file
+    QFile file(xml_File_new_location);
+    if(!file.open(QFile::WriteOnly | QFile::Text)) //if no location chosen display warning message
+    {
+        QMessageBox::warning(this,"Error","No location was chosen");
+    }
+    else
+    {
+        QTextStream out(&file);
+        out << text;
+        file.flush();
+        file.close();
+    }
 
 }
 
