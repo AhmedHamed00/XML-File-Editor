@@ -2,12 +2,11 @@
 // Name        : Prettify.cpp
 // Author      : Noha Adel ~.~
 // Description : CPP file for a the prettify/formatting function, it's responsible for
-//               formatting an xml file so that the output has correct indentation levels 
+//               formatting an xml file so that the output has correct indentation levels
 //============================================================================
 
 #include "prettify.h"
 using namespace std;
-
 
 // Function to remove leading whitespaces (including tabs) from a string
 string removeLeadingTabs(const string& line) {
@@ -33,15 +32,21 @@ void separateTags(const string& inputFileName, const string& outputFileName) {
 	string line;
 	string openingTag;
 	string data;
+
+	string trimmedLine;
+	size_t pos=0;
+	size_t openingBracketPos=0;
+	size_t closingBracketPos=0;
+
 	while (getline(inputFile, line)) {
 		// Remove leading tabs and whitespaces
-		string trimmedLine = removeLeadingTabs(line);
+		trimmedLine = removeLeadingTabs(line);
 
 		// Separate tags onto individual lines
-		size_t pos = 0;
+		pos = 0;
 		while (pos < trimmedLine.size()) {
-			size_t openingBracketPos = trimmedLine.find('<', pos);
-			size_t closingBracketPos = trimmedLine.find('>', openingBracketPos);
+			openingBracketPos = trimmedLine.find('<', pos);
+			closingBracketPos = trimmedLine.find('>', openingBracketPos);
 			if(openingBracketPos == pos){
 				if (openingBracketPos != string::npos && closingBracketPos != string::npos) {
 					// Separate opening and closing tags onto individual lines
@@ -81,16 +86,21 @@ void prettifyXML(const string& inputFileName, const string& outputFileName) {
 		cerr << "Error opening files." << std::endl;
 		return;
 	}
+
 	string line;
 	string tag;
 	int indentationLevel = 0;
+	int startTagPos;
+	int endTagPos1;
+	int closingStartTagPos;
+	int endTagPos2;
 
 	while (getline(inputFile, line))
 	{
-		int startTagPos = line.find('<');
-		int endTagPos1 = line.find('>');
-		int closingStartTagPos = line.find("</");
-		int endTagPos2 = 0;
+		startTagPos = line.find('<');
+		endTagPos1 = line.find('>');
+		closingStartTagPos = line.find("</");
+		endTagPos2 = 0;
 
 		//case of  opening tag-data-closing tag
 		if (startTagPos>=0 && endTagPos1 >=0 && closingStartTagPos!=0)
@@ -148,14 +158,3 @@ void prettifyXML(const string& inputFileName, const string& outputFileName) {
 	outputFile.close();
 
 }
-
-//that part was for testing, you can ignore 
-/*
-int main() {
-
-	separateTags("src/input.xml", "src/sep_output.xml");
-	prettifyXML("src/sep_output.xml", "src/output.xml");
-
-	return 0;
-}*/
-
