@@ -195,15 +195,16 @@ pair<int,post> network::search_posts(string key)
 }
 
 //find all matching posts in the network
-vector<pair<int,vector<post>>> network::search_posts_all(string key)
+vector<pair<int, post>> network::search_posts_all(string key)
 {
 	key = trim_str(key);
-	vector<pair<int, vector<post>>> search_res;
+	vector<pair<int, post>> search_res;
 	for (int i = 0; i < users.size(); i++)
 	{
 		vector<post> _posts = users[i].search_posts_all(key);
 		if (!_posts.empty())
-			search_res.push_back({ users[i].id,_posts });
+			for(int i=0;i<_posts.size();i++)
+			search_res.push_back({ users[i].id,_posts[i]});
 	}
 	return search_res;
 }

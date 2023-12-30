@@ -33,7 +33,7 @@ public:
 	vector<user> users = {};
 	network(string& xml_path);
 	pair<int, post> search_posts(string key);
-	vector<pair<int,vector<post>>> search_posts_all(string key);
+	vector<pair<int, post>> search_posts_all(string key);
 	int get_index(int _id);
 	user* get_user(int _id);
 	network() {};
