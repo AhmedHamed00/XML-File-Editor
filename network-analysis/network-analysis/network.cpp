@@ -203,8 +203,8 @@ vector<pair<int, post>> network::search_posts_all(string key)
 	{
 		vector<post> _posts = users[i].search_posts_all(key);
 		if (!_posts.empty())
-			for(int i=0;i<_posts.size();i++)
-			search_res.push_back({ users[i].id,_posts[i]});
+			for(int j=0;j<_posts.size();j++)
+			search_res.push_back({ users[i].id,_posts[j]});
 	}
 	return search_res;
 }
