@@ -34,8 +34,6 @@ private slots:
 
     void on_format_button_clicked();
 
-    void on_graph_button_clicked();
-
     void on_details_button_clicked();
 
     void on_actionundo_triggered();
@@ -46,6 +44,10 @@ private slots:
     void on_actionDecompress_triggered();
 
     void on_actionCompress_triggered();
+
+    void on_Minify_button_clicked();
+
+    void on_actionSave_to_another_location_triggered();
 
 private:
     Ui::XML_project *ui;

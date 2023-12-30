@@ -7,8 +7,16 @@
  * Inputs:
  *		  input-> the xml file read into a char vector
  */
-void _Minify(std::vector<char>& input)
+void _Minify(string input_name)
 {
+    ifstream test;
+    test.open(input_name, std::ios_base::in | std::ios::binary);
+    vector<char> input;
+    char ch;
+    while (test.get(ch)) {
+        input.push_back(ch);
+    }
+    test.close();
     for (unsigned int i = 0; i < input.size(); i++)
     {
         if(i< (input.size()-5) && input[i] =='<' && input[i+1] == 'b' && input[i+2] == 'o' && input[i+3] == 'd' && input[i+4] == 'y')
@@ -29,6 +37,13 @@ void _Minify(std::vector<char>& input)
             i--;
         }
     }
+    ofstream test2;
+    test2.open(input_name, std::ios_base::out | std::ios::binary);
+    for (int i = 0; i < input.size(); i++)
+    {
+        test2 << input[i];
+    }
+    test2.close();
 }
 /*
  * Description :
@@ -48,21 +63,20 @@ bool compareBycount(node* a,node* b)
  * Inputs:
  *		  input: the name of the file including bath
  */
-long long Compress_Using_Hoffman_Coding(std::string input_name , std::string Hoffman_Tree,std::string Hoffman_Coded_Output)
+long long Compress_Using_Hoffman_Coding(string input_name,string Hoffman_Tree,string Hoffman_Coded_Output)
 {
     ifstream test;
     test.open(input_name, std::ios_base::in | std::ios::binary);
-    std::vector<char> input;
+    vector<char> input;
     char ch;
     while (test.get(ch)) {
         input.push_back(ch);
     }
     test.close();
-    _Minify(input);
     vector<char> output;
     tree hoffman;
-    std::vector<node *> letters_nodes;
-    std::vector<node *> letters_nodes_copy;
+    vector<node *> letters_nodes;
+    vector<node *> letters_nodes_copy;
     for (int j = 0; j < 127; j++)
     {
         long long count = 0;
@@ -102,10 +116,10 @@ long long Compress_Using_Hoffman_Coding(std::string input_name , std::string Hof
         sort(letters_nodes.begin(), letters_nodes.end(), compareBycount);
     }
     hoffman.head = letters_nodes[0];
-    std::vector<std::vector <char>> encoding_list;
+    vector<vector <char>> encoding_list;
     for(int i=0;i<128;i++)
     {
-        std::vector <char> y;
+        vector <char> y;
         y.push_back(-1);
         encoding_list.push_back(y);
     }
@@ -120,7 +134,7 @@ long long Compress_Using_Hoffman_Coding(std::string input_name , std::string Hof
         }
         encoding_list[letters_nodes_copy[i]->data].insert(encoding_list[letters_nodes_copy[i]->data].begin(), c->direction);
     }
-    std::vector<char> bitss;
+    vector<char> bitss;
 
     for (long long i = 0; i < input.size(); i++)
     {
@@ -180,7 +194,7 @@ long long Compress_Using_Hoffman_Coding(std::string input_name , std::string Hof
         }
 
     }
-    Save_Hoffman_Tree_data(saved_tree,output, Hoffman_Tree,Hoffman_Coded_Output);
+    Save_Hoffman_Tree_data(saved_tree,output, Hoffman_Tree, Hoffman_Coded_Output);
     for (int i=0;i< letters_nodes_copy.size();i++)
     {
         free(letters_nodes_copy[i]);

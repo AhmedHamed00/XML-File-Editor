@@ -992,5 +992,7 @@ void do_error_action()
 {
     undo_stack.push(stack_storage(error_list, string_file, mismatch_error, missing_opening, \
                                   missing_closing, missing_bracket, misspelled_tags));
+    string_file.clear();
+    string_file.shrink_to_fit();
     read_file_into_vector();
 }

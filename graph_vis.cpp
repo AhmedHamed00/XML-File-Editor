@@ -4,9 +4,11 @@
 Graph_vis::Graph_vis(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::Graph_vis)
+
 {
     ui->setupUi(this);
-   QPixmap p("graph.dot.png");
+    ui->label->setScaledContents(true);
+    QPixmap p("graph.dot.png");
 
     ui->label->setPixmap(p);
 }

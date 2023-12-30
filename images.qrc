@@ -5,5 +5,8 @@
         <file>Open_icon-icons.com_73704.png</file>
         <file>10558_green_undo_icon.png</file>
         <file>10508_green_redo_icon.png</file>
+        <file>compression.png</file>
+        <file>zip.png</file>
+        <file>save.png</file>
     </qresource>
 </RCC>

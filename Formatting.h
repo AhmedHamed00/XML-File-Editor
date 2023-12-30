@@ -19,10 +19,10 @@ typedef struct tree {
     node* head;
 } tree;
 
-void _Minify(std::vector<char>& input);
-void Save_Hoffman_Tree_data(std::vector<char>& input_tree, std::vector<char>& input_data, std::string hoffman_tree_file, std::string hoffman_coded_fle);
-long long Compress_Using_Hoffman_Coding(std::string input_name, std::string Hoffman_Tree,std::string Hoffman_Coded_Output);
-void Decompress_Hoffman_Coding(std::string outt, std::string tree_file_name, std::string coded_text);
+void _Minify(string input_name);
+void Save_Hoffman_Tree_data(vector<char>& input_tree, vector<char>& input_data, string hoffman_tree_file, string hoffman_coded_fle);
+long long Compress_Using_Hoffman_Coding(string input_name, string Hoffman_Tree, string Hoffman_Coded_Output);
+void Decompress_Hoffman_Coding(string outt, string tree_file_name, string coded_text);
 
 
 #endif /* Formating */

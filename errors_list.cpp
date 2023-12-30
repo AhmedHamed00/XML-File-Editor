@@ -7,8 +7,8 @@ errors_list::errors_list(QWidget *parent)
 {
     ui->setupUi(this);
     ui->textEdit->setTextColor(Qt::red);
-    ui->textEdit->setText(error_list_text);
     ui->textEdit->setReadOnly(true);
+    ui->textEdit->setText(error_list_text);
 }
 
 errors_list::~errors_list()
