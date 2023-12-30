@@ -267,9 +267,16 @@ vector<user*> networking_analysis::suggest_followers(int u_id)
 	vector<user*> suggestion_list;
 	//get user index from their id
 	int u_index = my_network.get_index(u_id);
-	//loop on all followers and add the user to the suggestion list
+	//loop on all followers and add their followers to the suggestion list
 	for (int i = 0; i < my_network.users[u_index].followers.size(); i++)
-		suggestion_list.push_back(my_network.get_user(my_network.users[u_index].followers[i]));
+	{
+		user follower = *my_network.get_user(my_network.users[u_index].followers[i]);
+		for (int j = 0; j < follower.followers.size(); j++)
+		{
+			if (follower.followers[j] == u_id)continue;
+			suggestion_list.push_back(my_network.get_user(follower.followers[j]));
+		}
+	}
 	//remove duplicates
 	vector<user*>::iterator ip;
 	ip = std::unique(suggestion_list.begin(), suggestion_list.end());
