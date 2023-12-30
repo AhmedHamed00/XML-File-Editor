@@ -21,8 +21,8 @@ public:
 	vector<post> posts = {};
 	vector<int> followers = {};
 	user(string& user_xml,int _index);
-	post search_posts(string& key);
-	vector<post> search_posts_all(string& key);
+	post search_posts(string key);
+	vector<post> search_posts_all(string key);
 	user() {};
 	friend ostream& operator<< (ostream& out, const user& c);
 };
@@ -32,8 +32,8 @@ public:
 	int number_of_users=0;
 	vector<user> users = {};
 	network(string& xml_path);
-	post search_posts(string& key);
-	vector<pair<int,vector<post>>> search_posts_all(string& key);
+	pair<int, post> search_posts(string key);
+	vector<pair<int,vector<post>>> search_posts_all(string key);
 	int get_index(int _id);
 	user* get_user(int _id);
 	network() {};

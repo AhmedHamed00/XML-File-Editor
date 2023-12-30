@@ -140,7 +140,7 @@ post::post(string& post_xml)
 }
 
 //the first matching post in the user posts
-post user::search_posts(string& key)
+post user::search_posts(string key)
 {
 	//loop on users posts
 	for (post _post : posts)
@@ -156,7 +156,7 @@ post user::search_posts(string& key)
 }
 
 //find all matching posts in the user posts
-vector<post> user::search_posts_all(string& key)
+vector<post> user::search_posts_all(string key)
 {
 	vector<post> res;
 	for (post _post : posts)
@@ -179,23 +179,25 @@ vector<post> user::search_posts_all(string& key)
 }
 
 //find the first matching post in the network
-post network::search_posts(string& key)
+pair<int,post> network::search_posts(string key)
 {
+	key = trim_str(key);
 	//loop on all users in network
 	for (int i = 0; i < users.size(); i++)
 	{
 		//search each user for the post
 		post _post = users[i].search_posts(key);
 		//if the user has a post return it
-		if (_post.body != "")return _post;
+		if (_post.body != "")return { users[i].id,_post};
 	}
 	//return empty post
-	return post();
+	return { -1, post() };
 }
 
 //find all matching posts in the network
-vector<pair<int,vector<post>>> network::search_posts_all(string& key)
+vector<pair<int,vector<post>>> network::search_posts_all(string key)
 {
+	key = trim_str(key);
 	vector<pair<int, vector<post>>> search_res;
 	for (int i = 0; i < users.size(); i++)
 	{
