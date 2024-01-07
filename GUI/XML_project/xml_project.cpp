@@ -7,15 +7,15 @@
 #include <vector>
 #include <stack>
 #include "json_window2.h"
-#include "XmlFile2Json.h"
-#include "prettify.h"
-#include "Formatting.h"
+#include "../../json/XmlFile2Json.h"
+#include "../../prettify/prettify.h"
+#include "../../Formatting/Formatting.h"
 #include "decompressedfile.h"
 #include "error_checking_window.h"
-#include "error_handling.h"
+#include "../../Formatting/error_handling.h"
 #include "errors_list.h"
 #include "xml_details.h"
-#include "network.h"
+#include "../../NETWORK/network.h"
 typedef enum {
     error_checking,error_correction,
     formatting,original,no_error_detected,minifying,unsolvable_error
