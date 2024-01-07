@@ -16,6 +16,7 @@
 #include "errors_list.h"
 #include "xml_details.h"
 #include "network.h"
+//error type to push and pop from undo , redo stack
 typedef enum {
     error_checking,error_correction,
     formatting,original,no_error_detected,minifying,unsolvable_error
@@ -28,7 +29,7 @@ std::pair <QString,operation> undo_redo; //the pair that we will keep pushing or
 
 
 bool misspelled_tags_check=0; //flags set by checkboxes to be checked on
-bool missing_brackets_check=0;
+bool missing_brackets_check=0; 
 
 
 QString text; //text contained in XML file
@@ -71,7 +72,7 @@ void XML_project::on_actionOpen_XML_file_triggered()
 {
     QString filter= "XML File (*.xml)" ; //filter inputs to xml only
     xml_File =QFileDialog::getOpenFileName(this,"Choose XML file",QDir::homePath(),filter);
-    xml_file_String= xml_File.toStdString();
+    xml_file_String= xml_File.toStdString(); //turn path to string to be able to pass it to functions
     QFile file(xml_File);
     ui->actionOpen_XML_file->setEnabled(false); //set buttons states according to what can be done on file now and what cant be done
     ui->actionSave_Text_as_XML_file->setEnabled(false);
@@ -169,7 +170,7 @@ void XML_project::color_errors() //function only to color the errors in the XML 
         // cursor2.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, error_list[j].line);
         // cursor2.movePosition(QTextCursor::EndOfLine);
         // ui->textEdit->setTextCursor(cursor2);
-        cursor.movePosition(QTextCursor::Start);
+        cursor.movePosition(QTextCursor::Start); //move cursor then type the error message
         for (int i=0 ;i<(error_list[j].line);i++)
         {
 
@@ -214,10 +215,10 @@ void XML_project::on_error_check_button_clicked()
 {
     std::uint8_t success=0;
     error_checking_window error_wind;
-    error_wind.setModal(true);
+    error_wind.setModal(true); //setup the other window
     error_wind.exec();
-    find_errors(xml_file_String,success, missing_brackets_check,misspelled_tags_check);
-    if(error_list.size()==0)
+    find_errors(xml_file_String,success, missing_brackets_check,misspelled_tags_check); //call error check function
+    if(error_list.size()==0) //if there were no errors
     {
          QMessageBox::information(this,"","No Errors were found");
         ui->error_check_button->setEnabled(false);
@@ -232,7 +233,7 @@ void XML_project::on_error_check_button_clicked()
         undo_stack.push(undo_redo);
         do_error_action();
     }
-    else
+    else //if there are errors
     {   string str;
         stringstream s;
         for(auto a:error_list)
@@ -242,13 +243,13 @@ void XML_project::on_error_check_button_clicked()
         str = s.str();
         error_list_text=QString::fromStdString(str);
         errors_list error_window;
-        error_window.setModal(true);
+        error_window.setModal(true); //open new window and type in it the errors 
         error_window.exec();
-        if(success==0 && missing_brackets_check)
+        if(success==0 && missing_brackets_check) //if missing brackets were found error cant be corrected
         {
             QMessageBox::warning(this,"Error","Missing Brackets were Found please correct the file and try again");
         }
-        color_errors();
+        color_errors(); //type errors on the text edit
         ui->error_check_button->setEnabled(false);
         ui->error_correct_button->setEnabled(true);
         ui->actionundo->setEnabled(true);
@@ -271,7 +272,7 @@ void XML_project::on_error_correct_button_clicked()
     ui->actionRedo->setEnabled(false);
     ui->actionundo->setEnabled(true);
     bool error_correction_status=solve_errors();
-    if(error_correction_status==0)
+    if(error_correction_status==0) //unsolvable error
     {
         QMessageBox::warning(this,"Error","Unsolvable Errors were Found please correct the file and try again");
         ui->error_correct_button->setEnabled(false);
@@ -279,7 +280,7 @@ void XML_project::on_error_correct_button_clicked()
         undo_redo.second=unsolvable_error;
         undo_stack.push(undo_redo);
     }
-    else
+    else //solvable error
     {
         write_on_textEdit_from_file();
         undo_redo.first=text;
@@ -294,7 +295,7 @@ void XML_project::on_error_correct_button_clicked()
 }
 
 
-void XML_project::on_jason_button_clicked()
+void XML_project::on_jason_button_clicked() //let user choose a location to save JSON file
 {
     int flag=1;
     QString filter= "Json File (*.json)" ;
@@ -315,7 +316,7 @@ void XML_project::on_jason_button_clicked()
 
     std::string Json_file_String = Json_path.toStdString();
 
-    xmlFileToJson(xml_file_String,Json_file_String);
+    xmlFileToJson(xml_file_String,Json_file_String); //call function
 
     QFile file2(Json_path); //take text of json file to display it on TextEdit
 
@@ -329,7 +330,7 @@ void XML_project::on_jason_button_clicked()
         Json_text= in.readAll();
     }
 
-    if(flag==1)
+    if(flag==1) //create new window to display json file
     {
         json_window2 json_file;
         json_file.setModal(true);
@@ -350,7 +351,7 @@ void XML_project::on_format_button_clicked()
     ui->actionundo->setEnabled(true);
     ui->format_button->setEnabled(true);
     ui->Minify_button->setEnabled(true);
-    separateTags(xml_file_String, "prettify1.xml");
+    separateTags(xml_file_String, "prettify1.xml"); //call format functions
     prettifyXML("prettify1.xml", xml_file_String);
     write_on_textEdit_from_file();
     undo_redo.first=text;
@@ -363,16 +364,15 @@ void XML_project::on_format_button_clicked()
 
 
 
-void XML_project::on_details_button_clicked()
+void XML_project::on_details_button_clicked() //go to the details window
 {
-
     xml_details network;
     network.setModal(true);
     network.exec();
 }
 
 
-void XML_project::on_actionundo_triggered()
+void XML_project::on_actionundo_triggered() //disable certain buttons and enable certain buttons also change file contents and text field contents
 {
     if(undo_stack.top().second==error_checking)
     {
@@ -411,13 +411,13 @@ void XML_project::on_actionundo_triggered()
         ui->Minify_button->setEnabled(true);
         ui->format_button->setEnabled(true);
     }
-    redo_stack.push(undo_stack.top());
+    redo_stack.push(undo_stack.top()); //push from undo to redo
     undo_stack.pop();
-    text=undo_stack.top().first;
+    text=undo_stack.top().first; //write on file the text and write on text field the text
     ui->actionRedo->setEnabled(true);
     ui->textEdit->setText(text);
     write_on_file();
-    undo_error_correction();
+    undo_error_correction(); //for error correction
     if(undo_stack.top().second==error_checking)
     {
         color_errors();
@@ -428,17 +428,16 @@ void XML_project::on_actionundo_triggered()
     }
 
 
-    if(undo_stack.size()==1)
+    if(undo_stack.size()==1) //no more undos
     {
         ui->actionundo->setEnabled(false);
     }
 }
 
 
-void XML_project::on_actionRedo_triggered()
+void XML_project::on_actionRedo_triggered() //enable and disable certain buttons and change file and textfield contents
 
 {
-
     if(redo_stack.top().second==error_checking)
     {
        ui->error_correct_button->setEnabled(true);
@@ -446,7 +445,6 @@ void XML_project::on_actionRedo_triggered()
     }
     else if(redo_stack.top().second==error_correction)
     {
-
         ui->error_correct_button->setEnabled(false);
         ui->format_button->setEnabled(true);
         ui->details_button->setEnabled(true);
@@ -486,7 +484,7 @@ void XML_project::on_actionRedo_triggered()
     ui->actionundo->setEnabled(true);
     ui->textEdit->setText(text);
     write_on_file();
-    do_error_action();
+    do_error_action(); //for error correction
     if(undo_stack.top().second==error_checking)
     {
         color_errors();
@@ -522,9 +520,9 @@ void XML_project::on_actionDecompress_triggered()
     }
     else
     {
-        file.close();
+        file.close();          //let user choose 3 locations
 
-        QString filter_tree= "Text File (*.txt)" ;
+        QString filter_tree= "Text File (*.txt)" ; //filter to text file
         decompress_path_tree =QFileDialog::getOpenFileName(this,"Choose The Hoffman tree File ",QDir::homePath(),filter_tree);
         decompress_path_tree_string= decompress_path_tree.toStdString();
         QFile file2(decompress_path_tree);
@@ -535,7 +533,7 @@ void XML_project::on_actionDecompress_triggered()
         else
         {
             file2.close();
-            QString filter_tree_output_coded= "Text File (*.txt)" ; //filter inputs to xml only
+            QString filter_tree_output_coded= "Text File (*.txt)" ; //filter inputs to text only
             decompress_path_tree_coded_output =QFileDialog::getOpenFileName(this,"Choose The Hoffman Tree coded output location ",QDir::homePath(),filter_tree_output_coded);
             decompress_path_tree_coded_output_string= decompress_path_tree_coded_output.toStdString();
             QFile file3(decompress_path_tree_coded_output);
@@ -547,7 +545,7 @@ void XML_project::on_actionDecompress_triggered()
             {
                 file3.close();
                 Decompress_Hoffman_Coding(decompress_path_string,decompress_path_tree_string,decompress_path_tree_coded_output_string);
-                QFile file4(decompress_path); //take text of json file to display it on TextEdit
+                QFile file4(decompress_path);
 
                 if(!file4.open(QFile::ReadOnly | QFile::Text))
                 {
@@ -583,7 +581,7 @@ void XML_project::on_actionCompress_triggered()
     std::string compress_path_tree_coded_output_string;
 
 
-    QString filter= "XML File (*.xml);; JSON File (*.json)" ; //filter inputs to xml only
+    QString filter= "XML File (*.xml);; JSON File (*.json)" ; //filter inputs to xml , JSON only
     compress_path =QFileDialog::getOpenFileName(this,"Choose XML or JSON file to Compress",QDir::homePath(),filter);
     compress_path_string= compress_path.toStdString();
     QFile file(compress_path);
@@ -595,7 +593,7 @@ void XML_project::on_actionCompress_triggered()
     {
         file.close();
 
-        QString filter_tree= "Text File (*.txt)" ; //filter inputs to xml only
+        QString filter_tree= "Text File (*.txt)" ; //filter inputs to txt only
         compress_path_tree =QFileDialog::getSaveFileName(this,"Choose The Hoffman Tree location ",QDir::homePath(),filter_tree);
         compress_path_tree_string= compress_path_tree.toStdString();
         QFile file2(compress_path_tree);
@@ -606,7 +604,7 @@ void XML_project::on_actionCompress_triggered()
         else
         {
             file2.close();
-            QString filter_tree_output_coded= "Text File (*.txt)" ; //filter inputs to xml only
+            QString filter_tree_output_coded= "Text File (*.txt)" ; //filter inputs to text only
             compress_path_tree_coded_output =QFileDialog::getSaveFileName(this,"Choose The Hoffman Tree coded output location ",QDir::homePath(),filter_tree_output_coded);
             compress_path_tree_coded_output_string= compress_path_tree_coded_output.toStdString();
             QFile file3(compress_path_tree_coded_output);
@@ -617,7 +615,7 @@ void XML_project::on_actionCompress_triggered()
             else
             {
                 file3.close();
-                long long bytes_size;
+                long long bytes_size; //to return the byte size in a message
                 QString message;
                 bytes_size=Compress_Using_Hoffman_Coding(compress_path_string,compress_path_tree_string,compress_path_tree_coded_output_string);
                 message= "Size of file after compression is : " + QString::number(bytes_size) + " bytes";
@@ -650,7 +648,7 @@ void XML_project::on_Minify_button_clicked()
 }
 
 
-void XML_project::on_actionSave_to_another_location_triggered()
+void XML_project::on_actionSave_to_another_location_triggered() //choose a location to save the current XML file
 {
     QString xml_File_new_location;
     QString filter= "XML File (*.xml)" ;
