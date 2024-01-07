@@ -200,6 +200,7 @@ pair<int,post> network::search_posts(string key)
 vector<pair<int, post>> network::search_posts_all(string key)
 {
 	key = trim_str(key);
+	if (key.empty())return vector<pair<int, post>>();
 	vector<pair<int, post>> search_res;
 	for (int i = 0; i < users.size(); i++)
 	{
