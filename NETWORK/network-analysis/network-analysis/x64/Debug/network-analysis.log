@@ -1,0 +1,6 @@
+﻿  network.cpp
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\network-analysis\network-analysis\network.cpp(25,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\network-analysis\network-analysis\network.cpp(26,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\network-analysis\network-analysis\network.cpp(35,12): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\network-analysis\network-analysis\network.cpp(36,10): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  network-analysis.vcxproj -> D:\ASU\7\DS\XML_PROJECT\XML-File-Editor\network-analysis\x64\Debug\network-analysis.exe
