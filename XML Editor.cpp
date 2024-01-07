@@ -12,7 +12,7 @@ int main()
     _Minify("sample.xml");
    cout<< Compress_Using_Hoffman_Coding("sample.xml", "Hoffman_Tree.txt", "Hoffman_Coded_Output.txt");
    vector<char> copy ;
-    Decompress_Hoffman_Coding( "ttttt", "Hoffman_Tree.txt","Hoffman_Coded_Output.txt");
+    Decompress_Hoffman_Coding( "sdaf45", "Hoffman_Tree.txt","Hoffman_Coded_Output.txt");
     for ( int i = 0; i < copy.size(); i++)
     {
         printf("%c", copy[i]);

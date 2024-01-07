@@ -19,8 +19,43 @@ void _Minify(string input_name)
 	test.close();
 	for (unsigned int i = 0; i < input.size(); i++)
 	{
-		
-		if (input[i]=='\n'|| input[i] == '\r' || input[i] == 9)
+		if(i< (input.size()-5) && input[i] =='<' && input[i+1] == 'b' && input[i+2] == 'o' && input[i+3] == 'd' && input[i+4] == 'y')
+		{
+			i++;
+			while (input[i] != '<')
+			{
+				if (input[i] == '\n' || input[i] == '\r' || input[i] == 9)
+				{
+					input.erase(input.begin() + i);
+				}
+				i++;
+			}
+		}
+		if (i < (input.size() - 5) && input[i] == '<' && input[i + 1] == 'n' && input[i + 2] == 'a' && input[i + 3] == 'm' && input[i + 4] == 'e')
+		{
+			i++;
+			while (input[i] != '<')
+			{
+				if (input[i] == '\n' || input[i] == '\r' || input[i] == 9)
+				{
+					input.erase(input.begin() + i);
+				}
+				i++;
+			}
+		}
+		if (i < (input.size() - 5) && input[i] == '<' && input[i + 1] == 't' && input[i + 2] == 'o' && input[i + 3] == 'p' && input[i + 4] == 'i' && input[i + 5] == 'c' && input[i + 6] == '>')
+		{
+			i++;
+			while (input[i] != '<')
+			{
+				if (input[i] == '\n' || input[i] == '\r' || input[i] == 9)
+				{
+					input.erase(input.begin() + i);
+				}
+				i++;
+			}
+		}
+		if (input[i]=='\n'|| input[i] == '\r' || input[i] == 9 || input[i] == ' ')
 		{
 			input.erase(input.begin() + i);
 			i--;
