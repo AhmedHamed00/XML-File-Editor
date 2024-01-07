@@ -80,7 +80,7 @@
         <item>
          <widget class="QPushButton" name="jason_button">
           <property name="text">
-           <string>Show Jason</string>
+           <string>Show JSON</string>
           </property>
          </widget>
         </item>

@@ -362,60 +362,9 @@ void XML_project::on_format_button_clicked()
 
 
 
-// void XML_project::on_graph_button_clicked()
-// {
-//     networking_analysis users_graph(xml_file_String);
-//     QString graph_details;
-//      graph_details="digraph test {";
-//      for(int i=0;i<users_graph.my_network.users.size();i++)
-//      {
-//        graph_details+="{" +QString::number(users_graph.my_network.users[i].id) + "}";
-//          if (users_graph.my_network.users[i].followers.size())
-//        {
-//           graph_details+="->";
-//           graph_details+="{";
-//           for(int j=0;j<users_graph.my_network.users[i].followers.size();j++)
-//           {
-//               graph_details+= QString::number(users_graph.my_network.users[i].followers[j]);
-//               if(j!=users_graph.my_network.users[i].followers.size()-1)
-//               {
-//                   graph_details += ",";
-//               }
-
-//               else if( j==users_graph.my_network.users[i].followers.size()-1)
-//               {
-//                   graph_details+="}";
-//               }
-//           }
-//        }
-//      }
-//      graph_details+="}";
-
-//     QFile file("graph.dot");
-
-//     if(!file.open(QFile::WriteOnly | QFile::Text))
-//     {
-
-//     }
-//     else
-//     {
-//         QTextStream out(&file);
-//         out << graph_details;
-//         file.flush();
-//         file.close();
-//         system("dot -Tpng -O graph.dot");
-//         Graph_vis new_graph;
-//         new_graph.setModal(true);
-//         new_graph.exec();
-
-//     }
-// }
-
 
 void XML_project::on_details_button_clicked()
 {
-    //pass xml to func of omar
-    //hnak b2a ya basha hat3mel set llview of the 2 lineedits in main , set them read only
 
     xml_details network;
     network.setModal(true);
