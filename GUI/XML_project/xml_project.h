@@ -1,0 +1,55 @@
+#ifndef XML_PROJECT_H
+#define XML_PROJECT_H
+
+#include <QMainWindow>
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class XML_project;
+}
+QT_END_NAMESPACE
+
+class XML_project : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    XML_project(QWidget *parent = nullptr);
+    ~XML_project();
+
+private slots:
+    void color_errors();
+    void write_on_textEdit_from_file();
+    void write_on_file();
+    void on_actionOpen_XML_file_triggered();
+
+    void on_actionSave_Text_as_XML_file_triggered();
+
+    void on_actionClear_triggered();
+
+    void on_error_check_button_clicked();
+
+    void on_error_correct_button_clicked();
+
+    void on_jason_button_clicked();
+
+    void on_format_button_clicked();
+
+    void on_details_button_clicked();
+
+    void on_actionundo_triggered();
+
+    void on_actionRedo_triggered();
+
+
+    void on_actionDecompress_triggered();
+
+    void on_actionCompress_triggered();
+
+    void on_Minify_button_clicked();
+
+    void on_actionSave_to_another_location_triggered();
+
+private:
+    Ui::XML_project *ui;
+};
+#endif // XML_PROJECT_H
