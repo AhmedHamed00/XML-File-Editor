@@ -24,7 +24,31 @@ void _Minify(string input_name)
             i++;
             while (input[i] != '<')
             {
-                if (input[i] == '\n')
+                if (input[i] == '\n' || input[i] == '\r' || input[i] == 9)
+                {
+                    input.erase(input.begin() + i);
+                }
+                i++;
+            }
+        }
+        if (i < (input.size() - 5) && input[i] == '<' && input[i + 1] == 'n' && input[i + 2] == 'a' && input[i + 3] == 'm' && input[i + 4] == 'e')
+        {
+            i++;
+            while (input[i] != '<')
+            {
+                if (input[i] == '\n' || input[i] == '\r' || input[i] == 9)
+                {
+                    input.erase(input.begin() + i);
+                }
+                i++;
+            }
+        }
+        if (i < (input.size() - 5) && input[i] == '<' && input[i + 1] == 't' && input[i + 2] == 'o' && input[i + 3] == 'p' && input[i + 4] == 'i' && input[i + 5] == 'c' && input[i + 6] == '>')
+        {
+            i++;
+            while (input[i] != '<')
+            {
+                if (input[i] == '\n' || input[i] == '\r' || input[i] == 9)
                 {
                     input.erase(input.begin() + i);
                 }
@@ -257,7 +281,6 @@ void Decompress_Hoffman_Coding( string outt,string tree_file_name,string coded_t
         }
         letters_nodes[letters_nodes.size() - 1]->occure = temp;
     }
-    int numbre_of_nodes = letters_nodes.size();
     sort(letters_nodes.begin(), letters_nodes.end(), compareBycount);
     while (letters_nodes.size() > 1)
     {
