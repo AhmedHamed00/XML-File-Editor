@@ -11,13 +11,14 @@ networking_analysis users_graph(xml_file_String);
 
 xml_details::xml_details(QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::xml_details)
+    , ui(new Ui::xml_details) //this is the window of details that contains many pressable buttons to show details about the xml file and also show the graph
 {
     ui->setupUi(this);
     ui->textEdit->setReadOnly(true);
     ui->lineEdit_influencer->setReadOnly(true);
     ui->lineEdit_active->setReadOnly(true);
     users_graph = networking_analysis(xml_file_String);
+    //setting up the buttons
     ui->comboBox_mutual_1->addItem("Select a User");
     ui->comboBox_mutual_2->addItem("Select a User");
     ui->comboBox_suggestions->addItem("Select a User");
@@ -36,9 +37,9 @@ xml_details::~xml_details()
     delete ui;
 }
 
-void xml_details::on_mutual_button_pressed()
+void xml_details::on_mutual_button_pressed() //2 drop down menus to chose users and show their mutual followers
 {
-    if(ui->comboBox_mutual_1->currentText()=="Select a User" ||ui->comboBox_mutual_2->currentText()=="Select a User" )
+    if(ui->comboBox_mutual_1->currentText()=="Select a User" ||ui->comboBox_mutual_2->currentText()=="Select a User" ) //one not chosen = warning
     {
          QMessageBox::warning(this,"Error","Please select a user first");
     }
@@ -60,9 +61,9 @@ void xml_details::on_mutual_button_pressed()
 }
 
 
-void xml_details::on_suggest_button_clicked()
+void xml_details::on_suggest_button_clicked() //suggest people to follow for a certain user in dropdown menu
 {
-    if(ui->comboBox_suggestions->currentText()=="Select a User" )
+    if(ui->comboBox_suggestions->currentText()=="Select a User" ) //warning if none are chosen
     {
         QMessageBox::warning(this,"Error","Please select a user first");
     }
@@ -85,20 +86,20 @@ void xml_details::on_suggest_button_clicked()
 }
 
 
-void xml_details::on_search_nutton_clicked()
+void xml_details::on_search_nutton_clicked() //search for a certain text or topic
 {
-    if(ui->lineEdit_search->text()=="")
+    if(ui->lineEdit_search->text()=="") //nothing typed in search bar = do nothing
     {
 
     }
     else
     {
 
-        if(ui->checkBox->isChecked())
+        if(ui->checkBox->isChecked()) //first post only
         {
             QString line_Edit_text=ui->lineEdit_search->text();
             pair<int,post> found_post=users_graph.my_network.search_posts(line_Edit_text.toStdString());
-            if(found_post.second.body=="")
+            if(found_post.second.body=="") //no matching post = warning message
             {
                 QMessageBox::warning(this,"Error","No matching post was found");
                 ui->lineEdit_search->clear();
@@ -120,7 +121,7 @@ void xml_details::on_search_nutton_clicked()
 
 
         }
-        else
+        else //all posts
         {
             QString line_Edit_text=ui->lineEdit_search->text();
             vector<pair<int,post>> found_posts =users_graph.my_network.search_posts_all(line_Edit_text.toStdString());
@@ -153,9 +154,9 @@ void xml_details::on_search_nutton_clicked()
 }
 
 
-void xml_details::on_pushButton_clicked()
+void xml_details::on_pushButton_clicked() //graph button
 {
-        QString graph_details;
+        QString graph_details; //hard coded for loop to type on QString then type on a dot file the contents of the graph
          graph_details="digraph test {";
          for(int i=0;i<users_graph.my_network.users.size();i++)
          {
