@@ -1,0 +1,8 @@
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/XML_project.dir
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/edit_cache.dir
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/rebuild_cache.dir
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/list_install_components.dir
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/install.dir
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/install/local.dir
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/XML_project_autogen_timestamp_deps.dir
+C:/Users/seifs/Documents/build-XML_project-Desktop_x86_windows_msvc2022_pe_64bit-Release/CMakeFiles/XML_project_autogen.dir
