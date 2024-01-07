@@ -6,7 +6,7 @@ errors_list::errors_list(QWidget *parent)
     , ui(new Ui::errors_list)
 {
     ui->setupUi(this);
-    ui->textEdit->setTextColor(Qt::red);
+    ui->textEdit->setTextColor(Qt::red); //window to show error in color red
     ui->textEdit->setReadOnly(true);
     ui->textEdit->setText(error_list_text);
 }
