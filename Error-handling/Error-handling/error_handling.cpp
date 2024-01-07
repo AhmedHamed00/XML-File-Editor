@@ -45,6 +45,7 @@ vector<string> tag_list = { "users","user","id","name","posts","post","topics","
 *****************************************************************************************************************************/
 
 //this function calculates the Levenshtein distance between two strings 
+//done
 static int lev_dist(string str1, string str2)
 {
 	int m = str1.length();
@@ -79,6 +80,7 @@ static int lev_dist(string str1, string str2)
 }
 
 //this funciton checks if a unkown tag could be corrected
+//done
 static bool spelling_error_check(xml_tag& tag)
 {
 	string str = tag.tag_name;
@@ -116,6 +118,7 @@ static bool spelling_error_check(xml_tag& tag)
 }
 
 //This function is used to find the missing bracket in opeening or closing tags
+//done
 static bool find_bracket_error(string path)
 {
 	ifstream file(path);
@@ -159,6 +162,7 @@ static bool find_bracket_error(string path)
 }
 
 //this funciton is used to parse all the tags from the next line of the file and return a vector of them
+//done
 static vector<string> get_tags(string& search_text)
 {
 	string parsed;
@@ -175,6 +179,7 @@ static vector<string> get_tags(string& search_text)
 }
 
 //this funciton checks if the tag is in the list of tags used for the social media xml app
+//done
 static bool is_inTagList(string tag_name)
 {
 	for (string tag_name_ : tag_list)
@@ -183,6 +188,7 @@ static bool is_inTagList(string tag_name)
 }
 
 //this functions removes a missing opening error and a missing closing error at specific indexes at creates a mismatch error
+//done
 static void create_mismatchError(int missing_opening_index, int missing_closing_index)
 {
 	pair<xml_tag, xml_tag> tag_pair;
@@ -196,6 +202,7 @@ static void create_mismatchError(int missing_opening_index, int missing_closing_
 }
 
 //this function clears all global variables for checking for new erros
+//done
 static void clear_vectorsData()
 {
 	error_list.clear();
@@ -232,7 +239,8 @@ static void create_error()
 }
 
 //this fucntion finds every missing opening tag and missing closing tag in the same excat lines and creates a mismatch error 
-static void parse_misMatches(stack<xml_tag>& tags)
+//done
+static void parse_misMatches()
 {
 	//find mismatches
 	//a mismatch is when the same tag is a missing open and another tag is missing close and both are in the same line
@@ -272,6 +280,7 @@ static void parse_misMatches(stack<xml_tag>& tags)
 }
 
 //this function loops on the stack and missing opening vector to get all missing closing tags
+//done
 static void parse_missingClose(stack<xml_tag>& tags)
 {
 	pair<xml_tag, xml_tag> tag_pair;
@@ -336,6 +345,7 @@ static void parse_missingClose(stack<xml_tag>& tags)
 }
 
 //this function finds all missing open tags
+//done
 static void parse_missingOpen(stack<xml_tag>& tags, ifstream& file, bool& multiTagLine_ERR, bool spell_check)
 {
 	int line = 0;
@@ -401,6 +411,7 @@ static void parse_missingOpen(stack<xml_tag>& tags, ifstream& file, bool& multiT
 	}
 }
 
+//done
 static void ensure_newLine(string file_path)
 {
 	fstream file(file_path);
@@ -448,7 +459,7 @@ uint8_t find_errors(string file_path, uint8_t& success, bool bracket_flag, bool 
 	sort(missing_opening.begin(), missing_opening.end());
 	sort(missing_closing.begin(), missing_closing.end());
 	//find mismatches
-	parse_misMatches(tags);
+	parse_misMatches();
 	//create errors with messages to be displayed
 	create_error();
 	success = 1;
@@ -545,8 +556,8 @@ static void read_file_into_vector()
 	file.close();
 }
 
-
-void parse_missingError()
+//done
+static void parse_missingError()
 {
 	MC_tags.clear();
 	MC_tags.shrink_to_fit();
@@ -561,6 +572,7 @@ void parse_missingError()
 	sort(MC_tags.begin(), MC_tags.end());
 	sort(MO_tags.begin(), MO_tags.end());
 }
+//done
 static string vec_to_str(vector<string>& content)
 {
 	string res;
@@ -570,6 +582,7 @@ static string vec_to_str(vector<string>& content)
 	}
 	return res;
 }
+//done
 static vector<string> get_tags_vec(vector<string>& str)
 {//this function returns all the tags in the vector of strings
 	vector<string> res;
@@ -581,6 +594,7 @@ static vector<string> get_tags_vec(vector<string>& str)
 	}
 	return res;
 }
+//done
 static int check_tagContent(string& open, string& close, vector<string>& content)
 {//return 1 if the tag should be the opening tag,2 if it should be the closing tag,return 0 if needs more info
 	vector<string> content_tags = get_tags_vec(content);
@@ -589,8 +603,6 @@ static int check_tagContent(string& open, string& close, vector<string>& content
 	int done_flag = 0;
 	//vectors to hold the nesting values
 	//TODO:use another header file for abstraction
-	vector<vector<string>> nesting_lists = { topics_nest,follower_nest,followers_nest,post_nest,posts_nest,\
-		user_nest,users_nest };
 	if (content_tags.size())
 	{//has tags in between
 		//check the nesting
@@ -687,18 +699,21 @@ static int check_tagContent(string& open, string& close, vector<string>& content
 	}
 	return true;
 }
+//done
 static void replace_closing(int i)
 {
 	int insert_at = string_file[mismatch_error[i].second.line].find("</" + mismatch_error[i].second.tag_name + ">");
 	string_file[mismatch_error[i].second.line].replace(insert_at + 2, mismatch_error[i].second.tag_name.size(), \
 		mismatch_error[i].first.tag_name);
 }
+//done
 static void replace_opening(int i)
 {
 	int insert_at = string_file[mismatch_error[i].first.line].find("<" + mismatch_error[i].first.tag_name + ">");
 	string_file[mismatch_error[i].first.line].replace(insert_at + 1, mismatch_error[i].first.tag_name.size(), \
 		mismatch_error[i].second.tag_name);
 }
+//done
 static void writeFile()
 {
 	ofstream file(input_file_path, ofstream::trunc | ofstream::out);
@@ -708,6 +723,7 @@ static void writeFile()
 	}
 	file.close();
 }
+//done
 static void solve_missingBracket()
 {
 	int prev_line = missing_bracket[0].line;
@@ -756,6 +772,7 @@ static void solve_missingBracket()
 		}
 	}
 }
+//done
 static bool is_inNesting_list(string parent, string child)
 {
 	if (child[1] == '/')
@@ -774,6 +791,7 @@ static bool is_inNesting_list(string parent, string child)
 		}
 	}
 }
+//done
 static void solve_MC(int index) //solve missing closing tag
 {
 	int line = MC_tags[index].line;
@@ -809,6 +827,7 @@ static void solve_MC(int index) //solve missing closing tag
 		string_file[line].insert(insert_at, "</" + MC_tags[index].tag_name + ">\n");
 	}
 }
+//done
 static void solve_MO(int index) //solve missing open tag
 {
 	int line = MO_tags[index].line;
@@ -844,6 +863,7 @@ static void solve_MO(int index) //solve missing open tag
 		string_file[line].insert(insert_at + in_after.size(), "\n<" + MO_tags[index].tag_name + ">");
 	}
 }
+//done
 static void solve_misssing_MO_MC_Tag()
 {
 	parse_missingError();
@@ -862,6 +882,7 @@ static void solve_misssing_MO_MC_Tag()
 		}
 	}
 }
+//done
 static bool solve_mismatch()
 {
 	for (int i = mismatch_error.size() - 1; i >= 0; i--)
@@ -910,6 +931,7 @@ static bool solve_mismatch()
 	}
 	return true;
 }
+//done
 static void solve_misspelling()
 {
 	for (int i = 0; i < misspelled_tags.size(); i++)
@@ -919,6 +941,7 @@ static void solve_misspelling()
 			misspelled_tags[i].second);
 	}
 }
+//done
 bool solve_errors()
 {
 
