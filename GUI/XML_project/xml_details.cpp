@@ -1,6 +1,6 @@
 #include "xml_details.h"
 #include "ui_xml_details.h"
-#include "network.h"
+#include "../../NETWORK/network.h"
 #include "graph_vis.h"
 #include <QFile>
 #include <QMessageBox>
