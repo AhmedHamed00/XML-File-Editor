@@ -6,7 +6,7 @@ Decompressedfile::Decompressedfile(QWidget *parent)
     , ui(new Ui::Decompressedfile)
 {
     ui->setupUi(this);
-    ui->textEdit3->setText(Decompress_text);
+    ui->textEdit3->setText(Decompress_text); //show the decompressed xml in a new window
     ui->textEdit3->setReadOnly(true);
 }
 
