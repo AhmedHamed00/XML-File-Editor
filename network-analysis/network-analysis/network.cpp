@@ -34,6 +34,7 @@ string trim_str(string str)
 {
 	int start = str.find_first_not_of(" \t\n");
 	int end = str.find_last_not_of(" \t\n");
+	if (start == -1 || end == -1)return "";
 	return str.substr(start, end - start + 1);
 }
 
@@ -182,6 +183,7 @@ vector<post> user::search_posts_all(string key)
 pair<int,post> network::search_posts(string key)
 {
 	key = trim_str(key);
+	if (key.empty())return { -1,post() };
 	//loop on all users in network
 	for (int i = 0; i < users.size(); i++)
 	{
@@ -293,10 +295,11 @@ vector<user*> networking_analysis::get_mutualFollowers(int u1_id,int u2_id)
 	int u1_index = my_network.get_index(u1_id);
 	int u2_index = my_network.get_index(u2_id);
 	//get u1 followers
-	for (int i = 0; i < my_network.number_of_users; i++)
+	for (int i = 0; i < my_network.users[u1_index].followers.size(); i++)
 	{
+		int follower_index = my_network.get_index(my_network.users[u1_index].followers[i]);
 		if (i == u1_index || i == u2_index)continue;
-		if (network_graph[u1_index][i] && network_graph[u2_index][i])
+		if (network_graph[u1_index][follower_index] && network_graph[u2_index][follower_index])
 			mutual_followers.push_back(&my_network.users[i]);
 	}
 	return mutual_followers;
